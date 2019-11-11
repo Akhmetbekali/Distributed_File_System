@@ -1,10 +1,10 @@
-
+import pickle
 import socket
 
 
 def client_program():
     host = socket.gethostname()
-    port = 8000
+    port = 8080
 
     client_socket = socket.socket()
     # client_socket.connect(('18.224.137.125', port)) IP - aws Instance IP; Open TCP in Security Groups
@@ -12,10 +12,12 @@ def client_program():
     message = input(" -> ")
 
     while message.lower().strip() != 'bye':
-        client_socket.send(message.encode())
-        data = client_socket.recv(1024).decode()
-
-        print('Received from server: ' + data)
+        client_socket.send(pickle.dumps(message))
+        data = pickle.loads(client_socket.recv(1024))
+        if type(data) == list:
+            print('Received from server: ' + ', '.join(data))
+        else:
+            print('Received from server: ' + data)
 
         message = input(" -> ")
 

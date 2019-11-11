@@ -1,11 +1,12 @@
 import os
+import pickle
 import socket
 
 
 def server_program():
 
     host = socket.gethostname()
-    port = 8000
+    port = 8080
 
     server_socket = socket.socket()
     server_socket.bind((host, port))
@@ -14,29 +15,71 @@ def server_program():
     conn, address = server_socket.accept()
     print("Connection from: " + str(address))
     while True:
-        data = conn.recv(1024).decode()
+        data = pickle.loads(conn.recv(1024))
         if not data:
             break
 
-        print("from [" + str(address) + "]" + str(data))
-        #data = input(' -> ')
-        #conn.send(data.encode())
-
         if any(x == data for x in messages) is True:
-            conn.send(data.encode())
             if data == "Make directory":
-                conn.send("\nEnter the name of directory".encode())
-                name = conn.recv(1024).decode()
-                if os.path.exists(name):
-                    conn.send("Already exists".encode())
-                else:
-                    os.mkdir(name)
-                    conn.send("Succesfully created".encode())
+                mkdir(conn)
+            elif data == "Delete directory":
+                rmdir(conn)
+            elif data == "Read directory":
+                readdir(conn)
+            elif data == "Open directory":
+                opendir(conn)
         else:
             data = "No such command"
-            conn.send(data.encode())
+            conn.send(pickle.dumps(data))
 
     conn.close()
+
+
+def mkdir(conn):
+    conn.send(pickle.dumps("\nEnter the name of directory"))
+    name = pickle.loads(conn.recv(1024))
+    if os.path.exists(name):
+        msg = "Already exists"
+        conn.send(pickle.dumps(msg))
+    else:
+        os.mkdir(name)
+        msg = "Succesfully created"
+        conn.send(pickle.dumps(msg))
+
+
+def rmdir(conn):
+    conn.send(pickle.dumps("\nEnter the name of directory"))
+    name = pickle.loads(conn.recv(1024))
+    if os.path.exists(name):
+        os.rmdir(name)
+        msg = "Directory deleted"
+        conn.send(pickle.dumps(msg))
+    else:
+        msg = "No such directory"
+        conn.send(pickle.dumps(msg))
+
+
+def readdir(conn):
+    conn.send(pickle.dumps("\nEnter the name of directory"))
+    name = pickle.loads(conn.recv(1024))
+    if os.path.exists(name):
+        list = os.listdir(name)
+        data = pickle.dumps(list)
+        conn.send(data)
+    else:
+        err = "No such file or directory: " + name
+        conn.send(pickle.dumps(err))
+
+
+def opendir(conn):
+    conn.send(pickle.dumps("\nEnter the name of directory"))
+    name = pickle.loads(conn.recv(1024))
+    if os.path.exists(name):
+        os.chdir(name)
+        conn.send(pickle.dumps(os.getcwd()))
+    else:
+        err = "No such file or directory: " + name
+        conn.send(pickle.dumps(err))
 
 
 if __name__ == '__main__':
@@ -44,3 +87,4 @@ if __name__ == '__main__':
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory"]
     server_program()
+    # print(os.listdir("DS_project"))
