@@ -1,10 +1,10 @@
 import pickle
 import socket
 import os, os.path
-import sys
+from ftplib import FTP
 
 
-def client_program():
+def client_nameserver():
     host = socket.gethostname()
     port = 8080
     client_socket = socket.socket()
@@ -28,26 +28,43 @@ def client_program():
     client_socket.close()
 
 
-def download(client_socket, filename):
-    pickle.loads(client_socket.recv(1024))
-    client_socket.send(filename.encode())
+def client_storage():
+    ftp = FTP()
+    ftp.connect('localhost', 8000)
+    ftp.login()
+    ftp.cwd('Test')  # replace with your directory
+    print("Do you want to upload or download file?")
+    ans = input()
+    if ans == "Upload":
+        uploadfile(ftp)
+    elif ans == "Download":
+        downloadfile(ftp)
+    else:
+        print("Error: No such command")
 
-    f = open(str(sys.argv[1]), 'rb')
 
-    size = os.path.getsize(sys.argv[1])
-    bytes_transported = 1024
-    byte = f.read(1024)
-    print(client_socket.recv(1024).decode())
+def uploadfile(ftp):
+    print("Enter the filename: ")
+    filename = input()
+    ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
+    ftp.quit()
 
-    while byte:
-        percent = bytes_transported * 100 // size
-        if percent%10 == 0:
-            print(f'{percent}%')
-        bytes_transported += 1024
-        client_socket.send(byte)
-        byte = f.read(1024)
 
-    f.close()
+def downloadfile(ftp):
+    print("Enter the filename: ")
+    filename = input()
+    localfile = open(filename, 'wb')
+    ftp.retrbinary('RETR ' + filename, localfile.write, 1024)
+    ftp.quit()
+    localfile.close()
+
 
 if __name__ == '__main__':
-    client_program()
+    print("Where you want to connect? NS/DS")
+    ans = input()
+    if ans == "NS":
+        client_nameserver()
+    elif ans == "DS":
+        client_storage()
+    else:
+        print("Error: No such connection")

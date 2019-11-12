@@ -210,8 +210,6 @@ def movefile(conn):
 
 
 def fileread(conn, filename):
-    # conn.send(pickle.dumps("\nEnter the name of file"))
-    # filename = pickle.loads(conn.recv(1024))
     if os.path.isfile(filename):
         i = 1
         while True:
@@ -222,10 +220,10 @@ def fileread(conn, filename):
             else:
                 filename = copy
                 break
+    conn.send(pickle.dumps("File created"))
     f = open(filename, 'wb')
-    conn.send(pickle.dumps('File created'))
     while True:
-        data = pickle.loads(conn.recv(1024))
+        data = conn.recv(1024)
         if data:
             f.write(data)
         else:
@@ -233,9 +231,8 @@ def fileread(conn, filename):
             return
 
 
-
 if __name__ == '__main__':
-    messages = ["Initialize", "Create file", "Write file", "Delete file",
+    messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory"]
     server_program()
