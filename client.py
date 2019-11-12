@@ -1,6 +1,7 @@
 import pickle
 import socket
-import os
+import os, os.path
+import sys
 
 
 def client_program():
@@ -14,7 +15,6 @@ def client_program():
     while message.lower().strip() != 'exit':
         client_socket.send(pickle.dumps(message))
         data = pickle.loads(client_socket.recv(1024))
-        print (type(data))
         if type(data) == list:
             print('Received from server: ' + ', '.join(data))
         elif type(data) == os.stat_result:
@@ -27,6 +27,27 @@ def client_program():
 
     client_socket.close()
 
+
+def download(client_socket, filename):
+    pickle.loads(client_socket.recv(1024))
+    client_socket.send(filename.encode())
+
+    f = open(str(sys.argv[1]), 'rb')
+
+    size = os.path.getsize(sys.argv[1])
+    bytes_transported = 1024
+    byte = f.read(1024)
+    print(client_socket.recv(1024).decode())
+
+    while byte:
+        percent = bytes_transported * 100 // size
+        if percent%10 == 0:
+            print(f'{percent}%')
+        bytes_transported += 1024
+        client_socket.send(byte)
+        byte = f.read(1024)
+
+    f.close()
 
 if __name__ == '__main__':
     client_program()

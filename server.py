@@ -40,6 +40,9 @@ def server_program():
                 copyfile(conn)
             elif data == "Move file":
                 movefile(conn)
+        elif data.split()[0] == "Read" and data.split()[1] == "file":
+            filename = data.split()[-1]
+            fileread(conn, filename)
         else:
             data = "No such command"
             conn.send(pickle.dumps(data))
@@ -206,8 +209,33 @@ def movefile(conn):
         conn.send(pickle.dumps(msg))
 
 
+def fileread(conn, filename):
+    # conn.send(pickle.dumps("\nEnter the name of file"))
+    # filename = pickle.loads(conn.recv(1024))
+    if os.path.isfile(filename):
+        i = 1
+        while True:
+            index = filename.rindex('.')
+            copy = filename[:index] + '_copy' + str(i) + filename[index:]
+            if os.path.isfile(copy):
+                i += 1
+            else:
+                filename = copy
+                break
+    f = open(filename, 'wb')
+    conn.send(pickle.dumps('File created'))
+    while True:
+        data = pickle.loads(conn.recv(1024))
+        if data:
+            f.write(data)
+        else:
+            conn.send(pickle.dumps("\nDone"))
+            return
+
+
+
 if __name__ == '__main__':
-    messages = ["Initialize", "Create file", "Read file", "Write file", "Delete file",
+    messages = ["Initialize", "Create file", "Write file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory"]
     server_program()
