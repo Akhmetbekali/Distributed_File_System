@@ -41,8 +41,14 @@ def client_server():
             elif data == "Move file":
                 movefile(conn)
             elif data == "Initialize":
-                ans = storage_server()
-                conn.send(pickle.dumps(ans))
+                address = ""  # IP of Data storage
+                conn.send(pickle.dumps(address))
+                storage_server(data)
+            elif data == "Upload" or "Download":
+                adress = ""  # IP of Data storage
+                conn.send(pickle.dumps(address))
+                storage_server(data)
+
         elif data.split()[0] == "Read" and data.split()[1] == "file":
             filename = data.split()[-1]
             fileread(conn, filename)
@@ -234,13 +240,12 @@ def fileread(conn, filename):
             return
 
 
-def storage_server():
+def storage_server(message):
     host = socket.gethostname()
     port = 8080
     client_socket = socket.socket()
     client_socket.connect((host, port))
 
-    message = "Initialize"
     client_socket.send(pickle.dumps(message))
 
     data = pickle.loads(client_socket.recv(1024))
@@ -250,6 +255,14 @@ def storage_server():
     elif data == "error":
         print("Error")
         return data
+    elif data == "Ready to" + message:
+        with open('test.txt', 'rb') as fh:
+            fh.seek(0, 0)
+            last_two = fh.readlines()[-2:]
+            last = last_two[1].decode().split('] ')[1]
+            path = last_two[0].decode().split('] ')[1].split(' ')[1]
+        if last == "FTP session closed (disconnect).":
+            kill = ''  # Kill process of client_storage in storage.py
     client_socket.close()
 
 
@@ -268,6 +281,4 @@ if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory"]
-    # client_server()
-    # ping()
-    storage_server()
+    client_server()

@@ -26,17 +26,6 @@ def client_storage():
     server.serve_forever()
 
 
-    with open('test.txt', 'rb') as fh:
-        fh.seek(0, 0)
-        last_two = fh.readlines()[-2:]
-        last = last_two[1].decode().split('] ')[1]
-
-        path = last_two[0].decode().split('] ')[1].split(' ')[1]
-    print(path)
-
-
-
-
 def storage_is_server():
     host = socket.gethostname()
     port = 8080
@@ -54,15 +43,16 @@ def storage_is_server():
     if data == 'Initialize':
         msg = "Clear"
         conn.send(pickle.dumps(msg))
-        print("Sent", msg)
+    if data == 'Upload' or 'Download':
+        msg = "Ready to" + data
+        conn.send(pickle.dumps(msg))
+        client_storage()
     else:
         msg = "error"
         conn.send(pickle.dumps(msg))
-        print("Sent", msg)
     conn.close()
 
 
 if __name__ == '__main__':
     # storage_is_server()
-    # print(last_two)
     client_storage()
