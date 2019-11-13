@@ -4,13 +4,13 @@ import socket
 import shutil
 
 
-def server_program():
+def client_server():
 
     host = socket.gethostname()
     port = 8080
 
     server_socket = socket.socket()
-    server_socket.bind((host, port))
+    server_socket.bind(('', port))
 
     server_socket.listen(2)
     conn, address = server_socket.accept()
@@ -40,6 +40,9 @@ def server_program():
                 copyfile(conn)
             elif data == "Move file":
                 movefile(conn)
+            elif data == "Initialize":
+                ans = storage_server()
+                conn.send(pickle.dumps(ans))
         elif data.split()[0] == "Read" and data.split()[1] == "file":
             filename = data.split()[-1]
             fileread(conn, filename)
@@ -231,8 +234,40 @@ def fileread(conn, filename):
             return
 
 
+def storage_server():
+    host = socket.gethostname()
+    port = 8080
+    client_socket = socket.socket()
+    client_socket.connect((host, port))
+
+    message = "Initialize"
+    client_socket.send(pickle.dumps(message))
+
+    data = pickle.loads(client_socket.recv(1024))
+    if data == "Clear":
+        print("OK")
+        return "OK"
+    elif data == "error":
+        print("Error")
+        return data
+    client_socket.close()
+
+
+def ping(connection):
+    hostname = connection # example
+    response = os.system("ping -c 1 " + hostname)
+
+    # and then check the response...
+    if response == 0:
+        print(hostname, 'is up!')
+    else:
+        print(hostname, 'is down!')
+
+
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory"]
-    server_program()
+    # client_server()
+    # ping()
+    storage_server()
