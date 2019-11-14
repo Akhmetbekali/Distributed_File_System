@@ -3,11 +3,21 @@ import pickle
 import socket
 import shutil
 
+ds1_ip = "192.168.0.136"
+ds2_ip = "3.15.172.241"
+ds3_ip = "18.221.170.198"
+client_ip = "192.168.0.137"
+ns_ip = "192.168.0.133"
+ftp_port = 8000
+ns_client_port = 8081
+ns_ds_port = 8080
+ds_ds_tcp_port = 8082
+
 
 def client_server():
 
-    host = "192.168.0.133"
-    port = 8080
+    host = ns_ip
+    port = ns_client_port
 
     server_socket = socket.socket()
     server_socket.bind((host, port))
@@ -41,29 +51,20 @@ def client_server():
             elif data == "Move file":
                 movefile(conn)
             elif data == "Initialize":
-                storage_address = ""  # IP of Data storage
+                storage_address = "192.168.0.136:8000"  # IP of Data storage
                 conn.send(pickle.dumps(storage_address))
                 storage_server(data, "")
-            # elif data == "Upload" or "Download":
-            elif data == "Download":
+            elif data == "Download" or "Upload":
                 msg = "Enter path: "
                 conn.send(pickle.dumps(msg))
                 path = pickle.loads(conn.recv(1024))
-                ip = "Enter IP: "
-                port = "Enter port: "
-                storage_address = "IP: " + ip + "\n Port: " + port
-                conn.send(pickle.dumps(storage_address))
                 storage_server(data, path)
-            elif data == "Upload":
-                msg = "Enter path: "
+                msg = "IP:"
                 conn.send(pickle.dumps(msg))
-                path = pickle.loads(conn.recv(1024))
-                ip = "Enter IP: "
-                port = "Enter port: "
-                storage_address = "IP: " + ip + "\n Port: " + port
-                conn.send(pickle.dumps(storage_address))
-                # storage_address = "IP: 192.168.0.136 \n Port: 8000"  # IP of Data storage
-                storage_server(data, path)
+                pickle.loads(conn.recv(1024))
+                msg = "192.168.0.136:8000"
+                conn.send(pickle.dumps(msg))
+
         elif data.split()[0] == "Read" and data.split()[1] == "file":
             filename = data.split()[-1]
             fileread(conn, filename)
@@ -256,8 +257,8 @@ def fileread(conn, filename):
 
 
 def storage_server(message, path):
-    host = socket.gethostname()
-    port = 8080
+    host = ds1_ip
+    port = ns_ds_port
     client_socket = socket.socket()
     client_socket.connect((host, port))
 
@@ -267,17 +268,11 @@ def storage_server(message, path):
     if data == "Clear":
         print("OK")
         return "OK"
-    elif data == "error":
+    elif data == "Ready to Upload" or "Ready to Download":
+        client_socket.send(pickle.dumps(path))
+    else:
         print("Error")
         return data
-    elif data == "Ready to" + message:
-        with open('test.txt', 'rb') as fh:
-            fh.seek(0, 0)
-            last_two = fh.readlines()[-2:]
-            last = last_two[1].decode().split('] ')[1]
-            path = last_two[0].decode().split('] ')[1].split(' ')[1]
-        if last == "FTP session closed (disconnect).":
-            kill = ''  # Kill process of client_storage in storage.py
     client_socket.close()
 
 
@@ -295,5 +290,5 @@ def ping(connection):
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory"]
+                "Make directory", "Delete directory", "Upload", "Download"]
     client_server()
