@@ -7,7 +7,7 @@ import shutil
 def client_server():
 
     host = "192.168.0.133"
-    port = 8080
+    port = 8081
 
     server_socket = socket.socket()
     server_socket.bind((host, port))
@@ -41,29 +41,20 @@ def client_server():
             elif data == "Move file":
                 movefile(conn)
             elif data == "Initialize":
-                storage_address = ""  # IP of Data storage
+                storage_address = "192.168.0.136:8000"  # IP of Data storage
                 conn.send(pickle.dumps(storage_address))
                 storage_server(data, "")
             # elif data == "Upload" or "Download":
-            elif data == "Download":
+            elif data == "Download" or "Upload":
                 msg = "Enter path: "
                 conn.send(pickle.dumps(msg))
                 path = pickle.loads(conn.recv(1024))
-                ip = "Enter IP: "
-                port = "Enter port: "
-                storage_address = "IP: " + ip + "\n Port: " + port
-                conn.send(pickle.dumps(storage_address))
                 storage_server(data, path)
-            elif data == "Upload":
-                msg = "Enter path: "
+                msg = "IP:"
                 conn.send(pickle.dumps(msg))
-                path = pickle.loads(conn.recv(1024))
-                ip = "Enter IP: "
-                port = "Enter port: "
-                storage_address = "IP: " + ip + "\n Port: " + port
-                conn.send(pickle.dumps(storage_address))
-                # storage_address = "IP: 192.168.0.136 \n Port: 8000"  # IP of Data storage
-                storage_server(data, path)
+                pickle.loads(conn.recv(1024))
+                msg = "192.168.0.136:8000"
+                conn.send(pickle.dumps(msg))
 
         elif data.split()[0] == "Read" and data.split()[1] == "file":
             filename = data.split()[-1]
@@ -257,7 +248,7 @@ def fileread(conn, filename):
 
 
 def storage_server(message, path):
-    host = socket.gethostname()
+    host = "192.168.0.136"
     port = 8080
     client_socket = socket.socket()
     client_socket.connect((host, port))
