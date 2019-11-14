@@ -5,8 +5,9 @@ from ftplib import FTP
 
 
 def client_nameserver():
-    host = "192.168.1.57"
-    port = 8000
+    host = socket.gethostname()
+    # host = "192.168.1.57"
+    port = 8080
     client_socket = socket.socket()
     # client_socket.connect(('18.224.137.125', port)) IP - aws Instance IP; Open TCP in Security Groups
     client_socket.connect((host, port))
@@ -30,9 +31,11 @@ def client_nameserver():
 
 def client_storage():
     ftp = FTP()
-    ftp.connect('192.168.1.57', 8000)
+    host = "192.168.0.136"
+    # host = socket.gethostname()
+    port = 8000
+    ftp.connect(host, port)
     ftp.login()
-    ftp.cwd('Test')  # replace with your directory
     print("Do you want to upload or download file?")
     ans = input()
     if ans == "Upload":
@@ -43,24 +46,33 @@ def client_storage():
         print("Error: No such command")
 
 
-def uploadfile(ftp):
+def uploadfile(ftp):  # Откуда запускаешь, оттуда и скачивает
+    print("Enter uploading path ( '/' is current): ")
+    path = input()
+    ftp.cwd(path)
+    print("Current directory: " + ftp.pwd())
     print("Enter the filename: ")
     filename = input()
     ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
-    ftp.quit()
+    ftp.close()
 
 
-def downloadfile(ftp):
+def downloadfile(ftp):  # Откуда запускаешь, туда и сохраняет
+    print("Enter downloading path ( '/' is current): ")
+    path = input()
+    ftp.cwd(path)
+    print("Current directory: " + ftp.pwd())
     print("Enter the filename: ")
     filename = input()
     localfile = open(filename, 'wb')
     ftp.retrbinary('RETR ' + filename, localfile.write, 1024)
-    ftp.quit()
+    ftp.pwd()
+
+    ftp.close()
     localfile.close()
 
 
 if __name__ == '__main__':
-    print(socket.gethostname())
     print("Where you want to connect? NS/DS")
     ans = input()
     if ans == "NS":
@@ -69,3 +81,4 @@ if __name__ == '__main__':
         client_storage()
     else:
         print("Error: No such connection")
+
