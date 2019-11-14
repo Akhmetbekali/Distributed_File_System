@@ -58,10 +58,10 @@ def start_ftp_server(handler):
     server.max_cons_per_ip = 5
     server.serve_forever()
 
-
-def client_storage(path):
-    handler = MyFTPHandler(FTPHandler)
-    start_ftp_server(handler)
+#
+# def client_storage(path):
+#     handler = MyFTPHandler(FTPHandler)
+#     start_ftp_server(handler)
 
 
 def start_replication(file, ip):
@@ -88,7 +88,7 @@ def uploadfile(ftp, file):  # Откуда запускаешь, оттуда и
 
 
 def storage_is_server():
-    host = socket.gethostname()
+    host = ds1_ip
     port = ns_ds_port
 
     server_socket = socket.socket()
@@ -106,7 +106,7 @@ def storage_is_server():
         msg = "Clear"
         conn.send(pickle.dumps(msg))
     elif data == "Replication":
-        handler = NoRepFTPHandler(FTPHandler)
+        handler = NoRepFTPHandler
         start_ftp_server(handler)
         msg = "Ready to replication"
         conn.send(pickle.dumps(msg))
@@ -114,11 +114,9 @@ def storage_is_server():
         msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
         path = pickle.loads(conn.recv(1024))
-        
-        cl_s = Thread(target=client_storage, args=(path))
 
-        cl_s.start()
-        cl_s.join()
+        handler = MyFTPHandler
+        start_ftp_server(handler)
     else:
         msg = "error"
         conn.send(pickle.dumps(msg))
