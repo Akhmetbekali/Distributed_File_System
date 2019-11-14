@@ -36,6 +36,9 @@ def client_nameserver():
 
 def client_storage(host, port):
     ftp = FTP()
+    host = "192.168.0.136"
+    # host = socket.gethostname()
+    port = 8000
     ftp.connect(host, port)
     ftp.login()
     print("Do you want to upload or download file?")
@@ -79,9 +82,8 @@ if __name__ == '__main__':
     ans = input()
     if ans == "NS":
         client_nameserver()
-
     elif ans == "DS":
-        client_storage("192.168.0.136", 8000)
+        client_storage()
     else:
         print("Error: No such connection")
 

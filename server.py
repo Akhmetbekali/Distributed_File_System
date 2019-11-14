@@ -6,11 +6,11 @@ import shutil
 
 def client_server():
 
-    host = socket.gethostname()
+    host = "192.168.0.133"
     port = 8080
 
     server_socket = socket.socket()
-    server_socket.bind(('', port))
+    server_socket.bind((host, port))
 
     server_socket.listen(2)
     conn, address = server_socket.accept()
@@ -269,10 +269,11 @@ def storage_server(message, path):
         print("OK")
         return "OK"
     elif data == "Ready to Upload" or "Ready to Download":
-        client_socket.settimeout(pickle.dumps(path))
+        client_socket.send(pickle.dumps(path))
     else:
         print("Error")
         return data
+    # elif data == "Ready to" + message:
         # with open('test.txt', 'rb') as fh:
         #     fh.seek(0, 0)
         #     last_two = fh.readlines()[-2:]
@@ -280,6 +281,8 @@ def storage_server(message, path):
         #     path = last_two[0].decode().split('] ')[1].split(' ')[1]
         # if last == "FTP session closed (disconnect).":
         #     kill = ''  # Kill process of client_storage in storage.py
+        # print("Ready to " + message)
+    client_socket.close()
 
 
 def ping(connection):
@@ -296,5 +299,5 @@ def ping(connection):
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory"]
+                "Make directory", "Delete directory", "Upload", "Download"]
     client_server()
