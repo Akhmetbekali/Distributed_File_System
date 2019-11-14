@@ -1,5 +1,6 @@
 import logging
 import sys
+from ftplib import FTP
 
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
@@ -9,7 +10,7 @@ import pickle
 import os
 
 
-def client_storage():
+def client_storage(path):
     authorizer = DummyAuthorizer()
 
     homedir = "/home/ali/PycharmProjects/DS_project/"
@@ -23,7 +24,12 @@ def client_storage():
 
     server.max_cons_per_ip = 1
     server = FTPServer(('', 8000), handler)
-    server.serve_forever()
+    current_path = FTP().pwd()
+    if current_path == path:
+        server.serve_forever()
+    else:
+        print("current: ", current_path)
+        print("path: ", path)
 
 
 def storage_is_server():
@@ -43,10 +49,16 @@ def storage_is_server():
     if data == 'Initialize':
         msg = "Clear"
         conn.send(pickle.dumps(msg))
-    if data == 'Upload' or 'Download':
-        msg = "Ready to" + data
+    elif data == "Download" or "Upload":
+        msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
-        client_storage()
+        path = pickle.loads(conn.recv(1024))
+        client_storage(path)
+    # elif data == "Upload":
+    #     msg = "Ready to " + data
+    #     conn.send(pickle.dumps(msg))
+    #     path = pickle.loads(conn.recv(1024))
+    #     client_storage(path)
     else:
         msg = "error"
         conn.send(pickle.dumps(msg))
@@ -54,5 +66,5 @@ def storage_is_server():
 
 
 if __name__ == '__main__':
-    # storage_is_server()
-    client_storage()
+    storage_is_server()
+    # client_storage()

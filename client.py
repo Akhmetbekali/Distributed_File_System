@@ -5,8 +5,8 @@ from ftplib import FTP
 
 
 def client_nameserver():
-    host = socket.gethostname()
-    # host = "192.168.1.57"
+    # host = socket.gethostname()
+    host = "192.168.0.133"
     port = 8080
     client_socket = socket.socket()
     # client_socket.connect(('18.224.137.125', port)) IP - aws Instance IP; Open TCP in Security Groups
@@ -23,17 +23,19 @@ def client_nameserver():
             print(data)
         else:
             print('Received from server: ' + data)
+            data = data.split(" \n")
+            if len(data) == 2:
+                ip = str(data[0].split(": ")[1])
+                port = int(data[1].split(": ")[1])
+                client_storage(ip, port)
 
         message = input(" -> ")
 
     client_socket.close()
 
 
-def client_storage():
+def client_storage(host, port):
     ftp = FTP()
-    # host = "192.168.1.57"
-    host = socket.gethostname()
-    port = 8000
     ftp.connect(host, port)
     ftp.login()
     print("Do you want to upload or download file?")
@@ -73,12 +75,13 @@ def downloadfile(ftp):  # Откуда запускаешь, туда и сох�
 
 
 if __name__ == '__main__':
-    print("Where you want to connect? NS/DS")
+    print("Where you want to connect?")
     ans = input()
     if ans == "NS":
         client_nameserver()
+
     elif ans == "DS":
-        client_storage()
+        client_storage("192.168.0.136", 8000)
     else:
         print("Error: No such connection")
 
