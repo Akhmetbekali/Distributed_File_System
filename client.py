@@ -3,13 +3,21 @@ import socket
 import os, os.path
 from ftplib import FTP
 
+ds1_ip = "192.168.0.136"
+ds2_ip = "3.15.172.241"
+ds3_ip = "18.221.170.198"
+client_ip = "192.168.0.137"
+ns_ip = "192.168.0.133"
+ftp_port = 8000
+ns_client_port = 8081
+ns_ds_port = 8080
+ds_ds_tcp_port = 8082
+
 
 def client_nameserver():
-    # host = socket.gethostname()
-    host = "192.168.0.133"
-    port = 8080
+    host = ns_ip
+    port = ns_client_port
     client_socket = socket.socket()
-    # client_socket.connect(('18.224.137.125', port)) IP - aws Instance IP; Open TCP in Security Groups
     client_socket.connect((host, port))
     message = input(" -> ")
 
@@ -23,10 +31,11 @@ def client_nameserver():
             print(data)
         else:
             print('Received from server: ' + data)
-            data = data.split(" \n")
-            if len(data) == 2:
-                ip = str(data[0].split(": ")[1])
-                port = int(data[1].split(": ")[1])
+            if data == "IP:":
+                client_socket.send(pickle.dumps("Waiting for IP"))
+                address = pickle.loads(client_socket.recv(1024))
+                ip = address.split(":")[0]
+                port = int(address.split(":")[1])
                 client_storage(ip, port)
 
         message = input(" -> ")
@@ -36,9 +45,6 @@ def client_nameserver():
 
 def client_storage(host, port):
     ftp = FTP()
-    host = "192.168.0.136"
-    # host = socket.gethostname()
-    port = 8000
     ftp.connect(host, port)
     ftp.login()
     print("Do you want to upload or download file?")
@@ -83,7 +89,7 @@ if __name__ == '__main__':
     if ans == "NS":
         client_nameserver()
     elif ans == "DS":
-        client_storage()
+        client_storage(ds1_ip, ftp_port)
     else:
         print("Error: No such connection")
 
