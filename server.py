@@ -3,10 +3,10 @@ import pickle
 import socket
 import shutil
 
-ds1_ip = "3.15.172.241"
+ds1_ip = "18.219.38.244"
 # ds2_ip = "18.221.170.198"
-client_ip = "192.168.1.52"
-ns_ip = "192.168.1.57"
+client_ip = "192.168.1.57"
+ns_ip = "192.168.1.52"
 ftp_port = 8000
 ns_client_port = 8081
 ns_ds_port = 8080
@@ -70,7 +70,7 @@ def client_server():
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
                 pickle.loads(conn.recv(1024))
-                msg = "192.168.0.136:8000"
+                msg = "{}:{}".format(ds1_ip, ftp_port)
                 conn.send(pickle.dumps(msg))
 
         elif data.split()[0] == "Read" and data.split()[1] == "file":
@@ -311,5 +311,5 @@ def ping(connection):
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory", "Upload", "Download"]
+                "Make directory", "Delete directory", "Upload", "Download", "Connect"]
     client_server()
