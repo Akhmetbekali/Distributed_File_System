@@ -4,11 +4,11 @@ import os, os.path
 from ftplib import FTP
 import time
 
-ds1_ip = "192.168.0.136"
-ds2_ip = "3.15.172.241"
-ds3_ip = "18.221.170.198"
-client_ip = "192.168.0.137"
-ns_ip = "192.168.0.133"
+# ds1_ip = "192.168.0.136"
+ds1_ip = "3.15.172.241"
+# ds3_ip = "18.221.170.198"
+client_ip = "192.168.1.52"
+ns_ip = "192.168.1.57"
 ftp_port = 8000
 ns_client_port = 8081
 ns_ds_port = 8080

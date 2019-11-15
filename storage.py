@@ -45,14 +45,18 @@ class NoRepFTPHandler(FTPHandler):
     
 def start_ftp_server(handler):
     authorizer = DummyAuthorizer()
-
-    homedir = "/Storage"
+    homedir = os.path.abspath("./Storage")
+    if not os.path.isdir(homedir):
+        os.mkdir(homedir)
+    if not os.path.isfile("{}/test.txt".format(homedir)):
+        f = open('{}/test.txt'.format(homedir), 'tw', encoding='utf-8')
+        f.close()
     authorizer.add_user("user", "12345", homedir, perm="elradfmw")  # ROOT
     authorizer.add_anonymous(homedir, perm="elradfmw")
     handler.authorizer = authorizer
 
-    logging.basicConfig(filename='/Storage/test.txt', level=logging.INFO)
-    
+    logging.basicConfig(filename='{}/test.txt'.format(homedir), level=logging.INFO)
+
     server = ThreadedFTPServer((ds1_ip, ftp_port), handler)
 
     server.max_cons_per_ip = 5
