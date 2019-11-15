@@ -2,15 +2,16 @@ import os
 import pickle
 import socket
 import shutil
+import constants
 
-# ds1_ip = "192.168.1.57"
-ns_ip = "18.221.170.198"
-client_ip = "192.168.1.52"
-ds1_ip = "3.15.172.241"
-ftp_port = 20
-ns_client_port = 8081
-ns_ds_port = 8080
-ds_ds_tcp_port = 8082
+ds1_ip = constants.ds1_ip
+ds2_ip = constants.ds2_ip
+ns_ip = constants.ns_ip
+client_ip = constants.client_ip
+ftp_port = constants.ftp_port
+ns_client_port = constants.ns_cliend_port
+ns_ds_port = constants.ns_ds_port
+ds_ds_tcp_port = constants.ds_ds_tcp_port
 
 
 def client_server():
