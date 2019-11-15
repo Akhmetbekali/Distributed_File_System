@@ -51,14 +51,23 @@ def client_server():
             elif data == "Move file":
                 movefile(conn)
             elif data == "Initialize":
-                storage_address = "192.168.0.136:8000"  # IP of Data storage
-                conn.send(pickle.dumps(storage_address))
-                storage_server(data, "")
-            elif data == "Download" or "Upload":
-                msg = "Enter path: "
+                # storage_address = "192.168.0.136:8000"  # IP of Data storage
+                # msg = \
+                start_storage(data, ds1_ip, ns_ds_port)
+                # conn.send(pickle.dumps(msg))
+                start_storage(data, ds2_ip, ns_ds_port)
+                # conn.send(pickle.dumps(msg))
+                msg = start_storage(data, ds3_ip, ns_ds_port)
                 conn.send(pickle.dumps(msg))
-                path = pickle.loads(conn.recv(1024))
-                storage_server(data, path)
+
+            elif data == "Connect":
+                current_dir = os.getcwd()
+                print("Connected " + current_dir)
+                # msg = "Enter destination path: "
+                # conn.send(pickle.dumps(msg))
+                # destination_path = pickle.loads(conn.recv(1024))
+                # msg = "Enter source path: "
+                # conn.send(pickle.dumps(msg))
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
                 pickle.loads(conn.recv(1024))
@@ -254,6 +263,19 @@ def fileread(conn, filename):
         else:
             conn.send(pickle.dumps("\nDone"))
             return
+
+
+def start_storage(msg, ip, port):
+    # host = ds1_ip
+    # port = ns_ds_port
+    client_socket = socket.socket()
+    client_socket.connect((ip, port))
+    client_socket.send(pickle.dumps(msg))
+    data = pickle.loads(client_socket.recv(1024))
+    if data == "Server started":
+        return data
+    else:
+        return "Error"
 
 
 def storage_server(message, path):

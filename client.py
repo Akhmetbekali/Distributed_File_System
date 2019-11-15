@@ -2,6 +2,7 @@ import pickle
 import socket
 import os, os.path
 from ftplib import FTP
+import time
 
 ds1_ip = "192.168.0.136"
 ds2_ip = "3.15.172.241"
@@ -37,6 +38,7 @@ def client_nameserver():
                 ip = address.split(":")[0]
                 port = int(address.split(":")[1])
                 client_storage(ip, port)
+                client_socket.close()
 
         message = input(" -> ")
 
@@ -44,6 +46,7 @@ def client_nameserver():
 
 
 def client_storage(host, port):
+    time.sleep(3)
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login()
@@ -58,10 +61,10 @@ def client_storage(host, port):
 
 
 def uploadfile(ftp):  # Откуда запускаешь, оттуда и скачивает
-    print("Enter uploading path ( '/' is current): ")
-    path = input()
-    ftp.cwd(path)
-    print("Current directory: " + ftp.pwd())
+    # print("Enter uploading path ( '/' is current): ")
+    # path = input()
+    # ftp.cwd(path)
+    # print("Current directory: " + ftp.pwd())
     print("Enter the filename: ")
     filename = input()
     ftp.storbinary('STOR ' + filename, open(filename, 'rb'))

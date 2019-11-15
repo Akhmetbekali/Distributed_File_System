@@ -46,15 +46,15 @@ class NoRepFTPHandler(FTPHandler):
 def start_ftp_server(handler):
     authorizer = DummyAuthorizer()
 
-    homedir = "/home/eazykyube/Downloads/DS_project/Distributed_File_System/Storage"
+    homedir = "/Storage"
     authorizer.add_user("user", "12345", homedir, perm="elradfmw")  # ROOT
     authorizer.add_anonymous(homedir, perm="elradfmw")
     handler.authorizer = authorizer
 
-    logging.basicConfig(filename='/home/eazykyube/Downloads/DS_project/Distributed_File_System/Storage/test.txt', level=logging.INFO)
+    logging.basicConfig(filename='/Storage/test.txt', level=logging.INFO)
     
     server = ThreadedFTPServer((ds1_ip, ftp_port), handler)
-    
+
     server.max_cons_per_ip = 5
     server.serve_forever()
 
@@ -92,19 +92,24 @@ def storage_is_server():
     port = ns_ds_port
 
     server_socket = socket.socket()
-    print("Init TCP server")
     server_socket.bind((ds1_ip, port))
-
     server_socket.listen(2)
     conn, address = server_socket.accept()
     print("Connection from: " + str(address))
 
     data = pickle.loads(conn.recv(1024))
+
     if not data:
         conn.close()
     if data == 'Initialize':
-        msg = "Clear"
+        handler = MyFTPHandler
+        start_ftp_server(handler)
+        msg = "Server started"
         conn.send(pickle.dumps(msg))
+    # if data == 'Connect':
+
+
+
     elif data == "Replication":
         handler = NoRepFTPHandler
         start_ftp_server(handler)
