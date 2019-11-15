@@ -3,11 +3,10 @@ import pickle
 import socket
 import shutil
 
-ds1_ip = "192.168.0.136"
-ds2_ip = "3.15.172.241"
-ds3_ip = "18.221.170.198"
-client_ip = "192.168.0.137"
-ns_ip = "192.168.0.133"
+ds1_ip = "3.15.172.241"
+# ds2_ip = "18.221.170.198"
+client_ip = "192.168.1.52"
+ns_ip = "192.168.1.57"
 ftp_port = 8000
 ns_client_port = 8081
 ns_ds_port = 8080
@@ -53,11 +52,11 @@ def client_server():
             elif data == "Initialize":
                 # storage_address = "192.168.0.136:8000"  # IP of Data storage
                 # msg = \
-                start_storage(data, ds1_ip, ns_ds_port)
+                msg = start_storage(data, ds1_ip, ns_ds_port)
                 # conn.send(pickle.dumps(msg))
-                start_storage(data, ds2_ip, ns_ds_port)
+                # start_storage(data, ds2_ip, ns_ds_port)
                 # conn.send(pickle.dumps(msg))
-                msg = start_storage(data, ds3_ip, ns_ds_port)
+                # msg = start_storage(data, ds3_ip, ns_ds_port)
                 conn.send(pickle.dumps(msg))
 
             elif data == "Connect":
