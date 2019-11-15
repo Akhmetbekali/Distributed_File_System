@@ -58,7 +58,7 @@ def start_ftp_server(handler):
 
     logging.basicConfig(filename='{}/test.txt'.format(homedir), level=logging.INFO)
     
-    server = ThreadedFTPServer((ds1_ip, ftp_port), handler)
+    server = ThreadedFTPServer(('', ftp_port), handler)
 
     server.max_cons_per_ip = 5
     server.serve_forever()
@@ -97,7 +97,7 @@ def storage_is_server():
     port = ns_ds_port
 
     server_socket = socket.socket()
-    server_socket.bind((ds1_ip, port))
+    server_socket.bind(('', port))
     server_socket.listen(2)
     conn, address = server_socket.accept()
     print("Connection from: " + str(address))
