@@ -31,11 +31,11 @@ class MyFTPHandler(FTPHandler):
         
         self.server.close_when_done()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
-        rep2 = Thread(target=start_replication, args=(file, ds3_ip))
+        # rep2 = Thread(target=start_replication, args=(file, ds3_ip))
         rep1.start()
-        rep2.start()
+        # rep2.start()
         rep1.join()
-        rep2.join()
+        # rep2.join()
         
     
 class NoRepFTPHandler(FTPHandler):
@@ -108,7 +108,7 @@ def storage_is_server():
         conn.close()
     if data == 'Initialize':
         handler = MyFTPHandler
-        start = Thread(target=start_ftp_server, args=(handler))
+        start = Thread(target=start_ftp_server, args=(handler,))
         start.start()
         start.join()
         msg = "Server started"
