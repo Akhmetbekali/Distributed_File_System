@@ -32,10 +32,11 @@ class MyFTPHandler(FTPHandler):
         # do something when a file has been sent
         print("File sent {}".format(file))
 
+    def on_login(self, username):
+        print("Login {}".format(username))
+
     def on_file_received(self, file):
-        print("File received")
-        
-        print(file)
+        print("File received {}".format(file))
         
         self.server.close_when_done()
         # rep1 = Thread(target=start_replication, args=(file, ds2_ip))
