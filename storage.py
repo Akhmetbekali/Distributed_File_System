@@ -61,8 +61,10 @@ def start_ftp_server(handler):
     if not os.path.isfile("{}/test.txt".format(homedir)):
         f = open('{}/test.txt'.format(homedir), 'tw', encoding='utf-8')
         f.close()
+
+    authorizer = DummyAuthorizer()
+    authorizer.add_user('user', '12345', homedir=homedir, perm='elradfmwMT')
     handler.authorizer = authorizer
-    handler.abstracted_fs = UnixFilesystem
     logging.basicConfig(filename='{}/test.txt'.format(homedir), level=logging.INFO)
     
     server = ThreadedFTPServer(('', ftp_port), handler)
