@@ -50,7 +50,7 @@ def client_storage(host, port):
     #time.sleep(3)
     ftp = FTP()
     ftp.connect(host, port)
-    ftp.login()
+    ftp.login("awsftpuser", "awsftpuser")
     print("Do you want to upload or download file?")
     ans = input()
     if ans == "Upload":
