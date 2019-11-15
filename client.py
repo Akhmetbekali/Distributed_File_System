@@ -4,8 +4,8 @@ import os, os.path
 from ftplib import FTP
 import time
 
-ds1_ip = "192.168.1.57"
-# ds2_ip = "18.221.170.198"
+# ds1_ip = "192.168.1.57"
+ds1_ip = "18.221.170.198"
 client_ip = "192.168.1.52"
 ns_ip = "3.15.172.241"
 ftp_port = 20
