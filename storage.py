@@ -2,9 +2,10 @@ import logging
 import sys
 from threading import Thread
 
-from pyftpdlib.authorizers import DummyAuthorizer
+from pyftpdlib.authorizers import DummyAuthorizer, UnixAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
+from pyftpdlib.filesystems import UnixFilesystem
 from pyftpdlib.servers import ThreadedFTPServer
 from ftplib import FTP
 import socket
@@ -45,7 +46,7 @@ class NoRepFTPHandler(FTPHandler):
         
     
 def start_ftp_server(handler):
-    authorizer = DummyAuthorizer()
+    authorizer = UnixAuthorizer(rejected_users=["root"], require_valid_shell=True)
 
     homedir = os.path.abspath("./Storage")
     if not os.path.isdir(homedir):
@@ -53,10 +54,8 @@ def start_ftp_server(handler):
     if not os.path.isfile("{}/test.txt".format(homedir)):
         f = open('{}/test.txt'.format(homedir), 'tw', encoding='utf-8')
         f.close()
-    authorizer.add_user("awsftpuser", "awsftpuser", homedir, perm="elradfmw")  # ROOT
-    authorizer.add_anonymous(homedir, perm="elradfmw")
     handler.authorizer = authorizer
-
+    handler.abstracted_fs = UnixFilesystem
     logging.basicConfig(filename='{}/test.txt'.format(homedir), level=logging.INFO)
     
     server = ThreadedFTPServer(('', ftp_port), handler)
