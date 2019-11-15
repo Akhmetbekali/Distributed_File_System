@@ -32,6 +32,9 @@ class MyFTPHandler(FTPHandler):
         # do something when a file has been sent
         print("File sent {}".format(file))
 
+    def on_disconnect(self):
+        print("%s:%s disconnected" % (self.remote_ip, self.remote_port))
+
     def on_login(self, username):
         print("Login {}".format(username))
 
