@@ -24,8 +24,14 @@ ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
 
 
-
 class MyFTPHandler(FTPHandler):
+    def on_connect(self):
+        print("%s:%s connected" % (self.remote_ip, self.remote_port))
+
+    def on_file_sent(self, file):
+        # do something when a file has been sent
+        print("File sent {}".format(file))
+
     def on_file_received(self, file):
         print("File received")
         
