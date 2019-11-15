@@ -4,10 +4,10 @@ import os, os.path
 from ftplib import FTP
 import time
 
-ds1_ip = "18.219.38.244"
+ds1_ip = "192.168.1.52"
 # ds2_ip = "18.221.170.198"
 client_ip = "192.168.1.57"
-ns_ip = "192.168.1.52"
+ns_ip = "18.219.38.244"
 ftp_port = 20
 ns_client_port = 8081
 ns_ds_port = 8080
@@ -36,6 +36,7 @@ def client_nameserver():
                 address = pickle.loads(client_socket.recv(1024))
                 ip = address.split(":")[0]
                 port = int(address.split(":")[1])
+                print(ip, port)
                 client_storage(ip, port)
                 client_socket.close()
 
@@ -45,7 +46,7 @@ def client_nameserver():
 
 
 def client_storage(host, port):
-    time.sleep(3)
+    #time.sleep(3)
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login()
@@ -63,7 +64,7 @@ def uploadfile(ftp):  # Откуда запускаешь, оттуда и ск�
     # print("Enter uploading path ( '/' is current): ")
     # path = input()
     # ftp.cwd(path)
-    # print("Current directory: " + ftp.pwd())
+    print("Current directory: " + ftp.pwd())
     print("Enter the filename: ")
     filename = input()
     ftp.storbinary('STOR ' + filename, open(filename, 'rb'))

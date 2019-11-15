@@ -12,11 +12,10 @@ import pickle
 import os
 import time
 
-# ds1_ip = "192.168.0.136"
-ds1_ip = "18.219.38.244"
-ds2_ip = "18.221.170.198"
-client_ip = "192.168.1.52"
-ns_ip = "192.168.1.57"
+ds1_ip = "192.168.1.52"
+# ds2_ip = "18.221.170.198"
+client_ip = "192.168.1.57"
+ns_ip = "18.219.38.244"
 ftp_port = 20
 ns_client_port = 8081
 ns_ds_port = 8080
