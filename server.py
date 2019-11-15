@@ -9,7 +9,7 @@ ds2_ip = constants.ds2_ip
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
-ns_client_port = constants.ns_cliend_port
+ns_client_port = constants.ns_client_port
 ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
 
