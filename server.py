@@ -3,16 +3,14 @@ import pickle
 import socket
 import shutil
 
-#ds1_ip = "192.168.0.136"
-ds1_ip = "18.219.38.244"
+ds1_ip = "192.168.1.52"
 # ds2_ip = "18.221.170.198"
-client_ip = "192.168.1.57"
-ns_ip = "192.168.1.52"
+client_ip =  "18.219.38.244"
+ns_ip = "192.168.1.57"
 ftp_port = 20
 ns_client_port = 8081
 ns_ds_port = 8080
 ds_ds_tcp_port = 8082
-
 
 def client_server():
 
@@ -71,7 +69,7 @@ def client_server():
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
                 pickle.loads(conn.recv(1024))
-                msg = "192.168.0.136:8000"
+                msg = "{}:{}".format(ds1_ip, ftp_port)
                 conn.send(pickle.dumps(msg))
 
         elif data.split()[0] == "Read" and data.split()[1] == "file":
