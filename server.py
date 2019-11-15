@@ -19,7 +19,7 @@ def client_server():
     port = ns_client_port
 
     server_socket = socket.socket()
-    server_socket.bind((host, port))
+    server_socket.bind(('', port))
 
     server_socket.listen(2)
     conn, address = server_socket.accept()

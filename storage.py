@@ -29,11 +29,11 @@ class MyFTPHandler(FTPHandler):
         print(file)
         
         self.server.close_when_done()
-        rep1 = Thread(target=start_replication, args=(file, ds2_ip))
-        # rep2 = Thread(target=start_replication, args=(file, ds3_ip))
-        rep1.start()
-        # rep2.start()
-        rep1.join()
+        # rep1 = Thread(target=start_replication, args=(file, ds2_ip))
+        # # rep2 = Thread(target=start_replication, args=(file, ds3_ip))
+        # rep1.start()
+        # # rep2.start()
+        # rep1.join()
         # rep2.join()
         
     
