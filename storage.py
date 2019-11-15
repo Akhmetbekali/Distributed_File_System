@@ -110,7 +110,7 @@ def storage_is_server():
         handler = MyFTPHandler
         start = Thread(target=start_ftp_server, args=(handler,))
         start.start()
-        start.join()
+        # start.join()
         msg = "Server started"
         conn.send(pickle.dumps(msg))
     # if data == 'Connect':
