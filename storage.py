@@ -53,7 +53,7 @@ def start_ftp_server(handler):
     if not os.path.isfile("{}/test.txt".format(homedir)):
         f = open('{}/test.txt'.format(homedir), 'tw', encoding='utf-8')
         f.close()
-    authorizer.add_user("user", "12345", homedir, perm="elradfmw")  # ROOT
+    authorizer.add_user("awsftpuser", "awsftpuser", homedir, perm="elradfmw")  # ROOT
     authorizer.add_anonymous(homedir, perm="elradfmw")
     handler.authorizer = authorizer
 
