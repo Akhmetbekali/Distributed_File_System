@@ -42,7 +42,7 @@ class MyFTPHandler(FTPHandler):
     def on_file_received(self, file):
         print("File received {}".format(file))
         
-        self.server.close_when_done()
+        # self.server.close_when_done()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
         rep2 = Thread(target=start_replication, args=(file, ds3_ip))
         rep1.start()
@@ -94,7 +94,7 @@ def start_replication(file, ip):
 
 def uploadfile(ftp, file):  # Откуда запускаешь, оттуда и скачивает
     print("Upload file" + file)
-    filename = file
+    filename = file.split('/')[-1]
     ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
     ftp.close()
 
