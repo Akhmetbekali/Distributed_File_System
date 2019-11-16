@@ -74,7 +74,9 @@ def client_server():
                 print(pickle.loads(conn.recv(1024)))
                 msg = "{}:{}".format(ds1_ip, ftp_port)
                 conn.send(pickle.dumps(msg))
+
                 directory = pickle.loads(conn.recv(1024))
+                print(directory)
                 if os.path.isdir(directory):
                     msg = "Enter the filename: "
                     conn.send(pickle.dumps(msg))
@@ -322,5 +324,5 @@ def ping(connection):
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory", "Upload", "Download", "Connect"]
+                "Make directory", "Delete directory", "Connect"]
     client_server()
