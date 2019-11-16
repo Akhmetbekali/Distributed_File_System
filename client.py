@@ -46,6 +46,8 @@ def client_nameserver():
                     folder = input()
                     client_socket.send(pickle.dumps(folder))
                     ans = pickle.loads(client_socket.recv(1024))
+
+                    print(ans)
                     if ans == "Enter the filename: ":
                         filename = input()
                         path = folder + filename

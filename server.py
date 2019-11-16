@@ -77,14 +77,15 @@ def client_server():
 
                 directory = pickle.loads(conn.recv(1024))
                 print(directory)
-                if os.path.isdir(directory):
-                    msg = "Enter the filename: "
-                    conn.send(pickle.dumps(msg))
-                    filename = pickle.loads(conn.recv(1024))
-                    print(directory + filename)
-                else:
-                    conn.send(pickle.dumps("No such directory"))
-                print(directory)
+                # if os.path.isdir(directory):
+                print(os.path.isdir(directory))
+                msg = "Enter the filename: "
+                conn.send(pickle.dumps(msg))
+                filename = pickle.loads(conn.recv(1024))
+                print(directory + filename)
+                # else:
+                # conn.send(pickle.dumps("No such directory"))
+                # print(directory)
 
         elif data.split()[0] == "Read" and data.split()[1] == "file":
             filename = data.split()[-1]
