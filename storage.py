@@ -152,6 +152,7 @@ def storage_is_server(port):
         start_ds3.join()
         start.join()
         # # start.join()
+        print("Server started")
         msg = "Server started"
         conn.send(pickle.dumps(msg))
     # if data == 'Connect':
