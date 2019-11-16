@@ -83,17 +83,11 @@ def start_ftp_server(handler):
 
 
 def start_replication(file, ip):
-    print("Start replication " + ip)
-    conn = socket.socket()
-    conn.connect((ip, ds_ds_tcp_port))
-    msg = "Replication"
-    conn.send(pickle.dumps(msg))
-    time.sleep(3)
     ftp = FTP()
     host = ip
     port = ftp_port
     ftp.connect(host, port)
-    ftp.login()
+    ftp.login(user='user', passwd='12345')
     uploadfile(ftp, file)
     return
 
