@@ -154,6 +154,8 @@ def storage_is_server(port):
         handler = NoRepFTPHandler
         start = Thread(target=start_ftp_server, args=(handler,))
         start.start()
+        msg = "Server started"
+        conn.send(pickle.dumps(msg))
     elif data == "Download" or "Upload":
         msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
