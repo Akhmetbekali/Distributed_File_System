@@ -71,8 +71,6 @@ class NoRepFTPHandler(FTPHandler):
         
     
 def start_ftp_server(handler):
-    # authorizer = UnixAuthorizer(rejected_users=["root"], require_valid_shell=True)
-
     homedir = os.path.abspath("./Storage")
     if not os.path.isdir(homedir):
         os.mkdir(homedir)
@@ -115,16 +113,14 @@ def uploadfile(ftp, file):  # Откуда запускаешь, оттуда и
 
 
 def start_storage(msg, ip, port):
-    # host = ds1_ip
-    # port = ns_ds_port
     client_socket = socket.socket()
     client_socket.connect((ip, port))
     client_socket.send(pickle.dumps(msg))
     data = pickle.loads(client_socket.recv(1024))
-    # if data == "Server started":
-    #     return data
-    # else:
-    #     return "Error"
+    if data == "Server started":
+        return data
+    else:
+        return "Error"
 
 
 def storage_is_server(port):
@@ -158,8 +154,6 @@ def storage_is_server(port):
         handler = NoRepFTPHandler
         start = Thread(target=start_ftp_server, args=(handler,))
         start.start()
-        msg = "Server started"
-        conn.send(pickle.dumps(msg))
     elif data == "Download" or "Upload":
         msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
