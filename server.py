@@ -56,9 +56,9 @@ def client_server():
                 # msg = \
                 msg = start_storage(data, ds1_ip, ns_ds_port)
                 # conn.send(pickle.dumps(msg))
-                start_storage(data, ds2_ip, ns_ds_port)
+                # start_storage(data, ds2_ip, ns_ds_port)
                 # conn.send(pickle.dumps(msg))
-                msg = start_storage(data, ds3_ip, ns_ds_port)
+                # msg = start_storage(data, ds3_ip, ns_ds_port)
                 conn.send(pickle.dumps(msg))
 
             elif data == "Connect":

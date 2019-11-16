@@ -42,7 +42,7 @@ class MyFTPHandler(FTPHandler):
     def on_file_received(self, file):
         print("File received {}".format(file))
         
-        # self.server.close_when_done()
+        self.server.close_when_done()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
         rep2 = Thread(target=start_replication, args=(file, ds3_ip))
         rep1.start()
@@ -52,7 +52,21 @@ class MyFTPHandler(FTPHandler):
         
     
 class NoRepFTPHandler(FTPHandler):
+    def on_connect(self):
+        print("%s:%s connected" % (self.remote_ip, self.remote_port))
+
+    def on_file_sent(self, file):
+        # do something when a file has been sent
+        print("File sent {}".format(file))
+
+    def on_disconnect(self):
+        print("%s:%s disconnected" % (self.remote_ip, self.remote_port))
+
+    def on_login(self, username):
+        print("Login {}".format(username))
+
     def on_file_received(self, file):
+        print("File replicated {}".format(file))
         self.server.close_when_done()
         
     
@@ -100,10 +114,20 @@ def uploadfile(ftp, file):  # Откуда запускаешь, оттуда и
     ftp.close()
 
 
-def storage_is_server():
-    host = ds1_ip
-    port = ns_ds_port
+def start_storage(msg, ip, port):
+    # host = ds1_ip
+    # port = ns_ds_port
+    client_socket = socket.socket()
+    client_socket.connect((ip, port))
+    client_socket.send(pickle.dumps(msg))
+    data = pickle.loads(client_socket.recv(1024))
+    if data == "Server started":
+        return data
+    else:
+        return "Error"
 
+
+def storage_is_server(port):
     server_socket = socket.socket()
     server_socket.bind(('', port))
     server_socket.listen(2)
@@ -116,15 +140,14 @@ def storage_is_server():
         conn.close()
     if data == 'Initialize':
         handler = MyFTPHandler
+        start_storage("Replication", ds2_ip, ds_ds_tcp_port)
+        start_storage("Replication", ds3_ip, ds_ds_tcp_port)
         start = Thread(target=start_ftp_server, args=(handler,))
         start.start()
         # start.join()
         msg = "Server started"
         conn.send(pickle.dumps(msg))
     # if data == 'Connect':
-
-
-
     elif data == "Replication":
         handler = NoRepFTPHandler
         start_ftp_server(handler)
@@ -145,4 +168,9 @@ def storage_is_server():
 
 
 if __name__ == '__main__':
-    storage_is_server()
+    ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
+    ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
+    ns_ds.start()
+    ds_ds.start()
+    ns_ds.join()
+    ds_ds.join()
