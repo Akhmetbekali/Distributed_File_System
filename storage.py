@@ -12,7 +12,7 @@ import socket
 import pickle
 import os
 import time
-import constants
+import constants        # if highlighted - still don't care, it works
 
 ds1_ip = constants.ds1_ip
 ds2_ip = constants.ds2_ip
@@ -121,10 +121,10 @@ def start_storage(msg, ip, port):
     client_socket.connect((ip, port))
     client_socket.send(pickle.dumps(msg))
     data = pickle.loads(client_socket.recv(1024))
-    if data == "Server started":
-        return data
-    else:
-        return "Error"
+    # if data == "Server started":
+    #     return data
+    # else:
+    #     return "Error"
 
 
 def storage_is_server(port):
@@ -148,19 +148,23 @@ def storage_is_server(port):
         start_ds2.start()
         start_ds3.start()
         start.start()
-        # start.join()
+        start_ds2.join()
+        start_ds3.join()
+        start.join()
+        # # start.join()
         msg = "Server started"
         conn.send(pickle.dumps(msg))
     # if data == 'Connect':
     elif data == "Replication":
         handler = NoRepFTPHandler
-        start_ftp_server(handler)
-        msg = "Ready to replication"
+        start = Thread(target=start_ftp_server, args=(handler,))
+        start.start()
+        msg = "Server started"
         conn.send(pickle.dumps(msg))
     elif data == "Download" or "Upload":
         msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
-        # path = pickle.loads(conn.recv(1024))
+        # path = pickle.loads(conn.recv(1024))start
 
         handler = MyFTPHandler
         start_ftp_server(handler)

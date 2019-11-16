@@ -2,7 +2,7 @@ import os
 import pickle
 import socket
 import shutil
-import constants
+import constants        # if highlighted - still don't care, it works
 
 ds1_ip = constants.ds1_ip
 ds2_ip = constants.ds2_ip
