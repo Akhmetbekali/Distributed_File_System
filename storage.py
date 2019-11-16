@@ -140,9 +140,13 @@ def storage_is_server(port):
         conn.close()
     if data == 'Initialize':
         handler = MyFTPHandler
-        start_storage("Replication", ds2_ip, ds_ds_tcp_port)
-        start_storage("Replication", ds3_ip, ds_ds_tcp_port)
+        start_ds2 = Thread(target=start_storage, args=("Replication", ds2_ip, ds_ds_tcp_port))
+        start_ds2.start()
+        start_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
+        start_ds3.start()
         start = Thread(target=start_ftp_server, args=(handler,))
+        start_ds2.start()
+        start_ds3.start()
         start.start()
         # start.join()
         msg = "Server started"
