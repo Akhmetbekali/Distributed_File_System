@@ -57,7 +57,7 @@ class NoRepFTPHandler(FTPHandler):
         
     
 def start_ftp_server(handler):
-    authorizer = UnixAuthorizer(rejected_users=["root"], require_valid_shell=True)
+    # authorizer = UnixAuthorizer(rejected_users=["root"], require_valid_shell=True)
 
     homedir = os.path.abspath("./Storage")
     if not os.path.isdir(homedir):
@@ -95,7 +95,8 @@ def start_replication(file, ip):
 def uploadfile(ftp, file):  # Откуда запускаешь, оттуда и скачивает
     print("Upload file" + file)
     filename = file.split('/')[-1]
-    ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
+
+    ftp.storbinary('STOR ' + filename, open("Storage/{}".format(filename), 'rb'))
     ftp.close()
 
 
