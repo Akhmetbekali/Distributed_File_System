@@ -43,12 +43,12 @@ class MyFTPHandler(FTPHandler):
         print("File received {}".format(file))
         
         self.server.close_when_done()
-        # rep1 = Thread(target=start_replication, args=(file, ds2_ip))
-        # # rep2 = Thread(target=start_replication, args=(file, ds3_ip))
-        # rep1.start()
-        # # rep2.start()
-        # rep1.join()
-        # rep2.join()
+        rep1 = Thread(target=start_replication, args=(file, ds2_ip))
+        rep2 = Thread(target=start_replication, args=(file, ds3_ip))
+        rep1.start()
+        rep2.start()
+        rep1.join()
+        rep2.join()
         
     
 class NoRepFTPHandler(FTPHandler):
@@ -138,7 +138,7 @@ def storage_is_server():
     elif data == "Download" or "Upload":
         msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
-        path = pickle.loads(conn.recv(1024))
+        # path = pickle.loads(conn.recv(1024))
 
         handler = MyFTPHandler
         start_ftp_server(handler)
@@ -146,6 +146,7 @@ def storage_is_server():
         msg = "error"
         conn.send(pickle.dumps(msg))
     conn.close()
+    storage_is_server()
 
 
 if __name__ == '__main__':
