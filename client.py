@@ -7,6 +7,7 @@ import constants
 
 ds1_ip = constants.ds1_ip
 ds2_ip = constants.ds2_ip
+ds3_ip = constants.ds3_ip
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
