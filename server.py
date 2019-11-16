@@ -71,10 +71,11 @@ def client_server():
                 # conn.send(pickle.dumps(msg))
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
-                filename =pickle.loads(conn.recv(1024))
-                print(filename)
+                print(pickle.loads(conn.recv(1024)))
                 msg = "{}:{}".format(ds1_ip, ftp_port)
                 conn.send(pickle.dumps(msg))
+                filename = pickle.loads(conn.recv(1024))
+                print(filename)
 
         elif data.split()[0] == "Read" and data.split()[1] == "file":
             filename = data.split()[-1]
