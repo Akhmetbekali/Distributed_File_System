@@ -62,8 +62,8 @@ def client_server():
                 conn.send(pickle.dumps(msg))
 
             elif data == "Connect":
-                current_dir = os.getcwd()
-                print("Connected " + current_dir)
+                # current_dir = os.getcwd()
+                # print("Connected " + current_dir)
                 # msg = "Enter destination path: "
                 # conn.send(pickle.dumps(msg))
                 # destination_path = pickle.loads(conn.recv(1024))
@@ -74,8 +74,15 @@ def client_server():
                 print(pickle.loads(conn.recv(1024)))
                 msg = "{}:{}".format(ds1_ip, ftp_port)
                 conn.send(pickle.dumps(msg))
-                filename = pickle.loads(conn.recv(1024))
-                print(filename)
+                directory = pickle.loads(conn.recv(1024))
+                if os.path.isdir(directory):
+                    msg = "Enter the filename: "
+                    conn.send(pickle.dumps(msg))
+                    filename = pickle.loads(conn.recv(1024))
+                    print(directory + filename)
+                else:
+                    conn.send(pickle.dumps("No such directory"))
+                print(directory)
 
         elif data.split()[0] == "Read" and data.split()[1] == "file":
             filename = data.split()[-1]

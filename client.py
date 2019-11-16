@@ -44,14 +44,18 @@ def client_nameserver():
                 if ans == "Upload":
                     print("Enter uploading path ( '/' is current): ")
                     folder = input()
-                    print("Enter the filename: ")
-                    filename = input()
-                    path = folder + filename
-                    client_socket.send(pickle.dumps(path))
+                    client_socket.send(pickle.dumps(folder))
+                    ans = pickle.loads(client_socket.recv(1024))
+                    if ans == "Enter the filename: ":
+                        filename = input()
+                        path = folder + filename
+                        client_socket.send(pickle.dumps(path))
+                        uploadfile(ip, port, filename)
 
-                    uploadfile(ip, port, filename)
-                # client_storage(ip, port)
-                client_socket.send(pickle.dumps("Uploaded"))
+                    else:
+                        print(ans)
+                    # client_storage(ip, port)
+                # client_socket.send(pickle.dumps("Uploaded"))
 
         message = input(" -> ")
 
