@@ -40,7 +40,7 @@ def client_nameserver():
                 port = int(address.split(":")[1])
                 print(ip, port)
                 client_storage(ip, port)
-                client_socket.close()
+                client_socket.send(pickle.dumps("Uploaded"))
 
         message = input(" -> ")
 
