@@ -39,7 +39,14 @@ def client_nameserver():
                 ip = address.split(":")[0]
                 port = int(address.split(":")[1])
                 print(ip, port)
-                client_storage(ip, port)
+                print("Do you want to upload or download file?")
+                ans = input()
+                print("Enter the filename: ")
+                filename = input()
+                client_socket.send(pickle.dumps(filename))
+                if ans == "Upload":
+                    uploadfile(ip, port, filename)
+                # client_storage(ip, port)
                 client_socket.send(pickle.dumps("Uploaded"))
 
         message = input(" -> ")
@@ -47,28 +54,24 @@ def client_nameserver():
     client_socket.close()
 
 
-def client_storage(host, port):
-    #time.sleep(3)
+# def client_storage(host, port):
+#     if ans == "Download":
+#         downloadfile(ftp)
+#     else:
+#         print("Error: No such command")
+
+
+def uploadfile(host, port, filename):  # Откуда запускаешь, оттуда и скачивает
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
-    print("Do you want to upload or download file?")
-    ans = input()
-    if ans == "Upload":
-        uploadfile(ftp)
-    elif ans == "Download":
-        downloadfile(ftp)
-    else:
-        print("Error: No such command")
 
-
-def uploadfile(ftp):  # Откуда запускаешь, оттуда и скачивает
-    print("Enter uploading path ( '/' is current): ")
-    path = input()
-    ftp.cwd(path)
-    print("Current directory: " + ftp.pwd())
-    print("Enter the filename: ")
-    filename = input()
+    # print("Enter uploading path ( '/' is current): ")
+    # path = input()
+    # ftp.cwd(path)
+    # print("Current directory: " + ftp.pwd())
+    # print("Enter the filename: ")
+    # filename = input()
     ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
     ftp.close()
 

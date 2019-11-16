@@ -71,7 +71,8 @@ def client_server():
                 # conn.send(pickle.dumps(msg))
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
-                pickle.loads(conn.recv(1024))
+                filename =pickle.loads(conn.recv(1024))
+                print(filename)
                 msg = "{}:{}".format(ds1_ip, ftp_port)
                 conn.send(pickle.dumps(msg))
 
