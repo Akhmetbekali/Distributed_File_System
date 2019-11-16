@@ -63,9 +63,9 @@ def client_storage(host, port):
 
 
 def uploadfile(ftp):  # Откуда запускаешь, оттуда и скачивает
-    # print("Enter uploading path ( '/' is current): ")
-    # path = input()
-    # ftp.cwd(path)
+    print("Enter uploading path ( '/' is current): ")
+    path = input()
+    ftp.cwd(path)
     print("Current directory: " + ftp.pwd())
     print("Enter the filename: ")
     filename = input()
