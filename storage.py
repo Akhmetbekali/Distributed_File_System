@@ -146,7 +146,7 @@ def storage_is_server():
         msg = "error"
         conn.send(pickle.dumps(msg))
     conn.close()
-    storage_is_server()
+    # storage_is_server()
 
 
 if __name__ == '__main__':
