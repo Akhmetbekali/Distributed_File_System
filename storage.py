@@ -145,8 +145,6 @@ def storage_is_server(port):
         start_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
         start_ds3.start()
         start = Thread(target=start_ftp_server, args=(handler,))
-        start_ds2.start()
-        start_ds3.start()
         start.start()
         start_ds2.join()
         start_ds3.join()
