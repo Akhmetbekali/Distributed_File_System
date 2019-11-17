@@ -67,6 +67,9 @@ def uploadfile(host, port, hashed_path, filename):  # Откуда запуск�
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
+    print(os.getcwd())
+    print("FtP", ftp.pwd())
+
     ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
     ftp.rename(filename, hashed_path)
     ftp.close()
