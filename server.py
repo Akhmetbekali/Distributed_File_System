@@ -326,4 +326,5 @@ if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory", "Connect"]
+    os.chdir("Storage")
     client_server()

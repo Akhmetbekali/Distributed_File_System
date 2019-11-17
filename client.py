@@ -46,14 +46,12 @@ def client_nameserver():
                     folder = input()
                     client_socket.send(pickle.dumps(folder))
                     ans = pickle.loads(client_socket.recv(1024))
-
                     print(ans)
                     if ans == "Enter the filename: ":
                         filename = input()
                         client_socket.send(pickle.dumps(filename))
                         print(folder + filename)
                         uploadfile(ip, port, filename)
-
                     else:
                         print(ans)
                         print(folder)
@@ -65,24 +63,10 @@ def client_nameserver():
     client_socket.close()
 
 
-# def client_storage(host, port):
-#     if ans == "Download":
-#         downloadfile(ftp)
-#     else:
-#         print("Error: No such command")
-
-
 def uploadfile(host, port, filename):  # Откуда запускаешь, оттуда и скачивает
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
-
-    # print("Enter uploading path ( '/' is current): ")
-    # path = input()
-    # ftp.cwd(path)
-    # print("Current directory: " + ftp.pwd())
-    # print("Enter the filename: ")
-    # filename = input()
     ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
     ftp.close()
 
@@ -97,18 +81,12 @@ def downloadfile(ftp):  # Откуда запускаешь, туда и сох�
     localfile = open(filename, 'wb')
     ftp.retrbinary('RETR ' + filename, localfile.write, 1024)
     ftp.pwd()
-
     ftp.close()
     localfile.close()
 
 
 if __name__ == '__main__':
-    print("Where you want to connect?")
-    ans = input()
-    if ans == "NS":
-        client_nameserver()
-    elif ans == "DS":
-        client_storage(ds1_ip, ftp_port)
-    else:
-        print("Error: No such connection")
-
+    print("Connecting to nameserver...")
+    # ans = input()
+    # client_nameserver()
+    os.chdir("Storage")
