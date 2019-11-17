@@ -53,7 +53,7 @@ def client_nameserver():
                         client_socket.send(pickle.dumps(filename))
                         print(folder + filename)
                         hashed_path = pickle.loads(client_socket.recv(1024))
-                        uploadfile(ip, port, hashed_path)
+                        uploadfile(ip, port, hashed_path, filename)
                     else:
                         print(ans)
                         print(folder)
@@ -63,11 +63,11 @@ def client_nameserver():
     client_socket.close()
 
 
-def uploadfile(host, port, filename):  # Откуда запускаешь, оттуда и скачивает
+def uploadfile(host, port, hashed_path, filename):  # Откуда запускаешь, оттуда и скачивает
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
-    ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
+    ftp.storbinary('STOR ' + hashed_path, open(filename, 'rb'))
     ftp.close()
 
 
