@@ -74,7 +74,7 @@ def client_server():
                     print(filename)
                     path = directory + filename
                     hashed_path = calc_hash(path)
-                    conn.send(hashed_path)
+                    conn.send(pickle.dumps(hashed_path))
                 else:
                     conn.send(pickle.dumps("No such directory"))
                     print(directory)
