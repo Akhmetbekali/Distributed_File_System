@@ -92,5 +92,5 @@ def downloadfile(ftp):  # Откуда запускаешь, туда и сох�
 if __name__ == '__main__':
     print("Connecting to nameserver...")
     # ans = input()
-    os.chdir("Storage")
+    # os.chdir("Storage")
     client_nameserver()
