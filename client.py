@@ -53,7 +53,7 @@ def client_nameserver():
                         client_socket.send(pickle.dumps(filename))
                         print(folder + filename)
                         hashed_path = pickle.loads(client_socket.recv(1024))
-                        uploadfile(ip, port, hashed_path)
+                        uploadfile(ip, port, hashed_path, filename)
                     else:
                         print(ans)
                         print(folder)
