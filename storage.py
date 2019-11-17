@@ -1,17 +1,13 @@
 import logging
-import sys
 from threading import Thread
 
-from pyftpdlib.authorizers import DummyAuthorizer, UnixAuthorizer
+from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
-from pyftpdlib.servers import FTPServer
-from pyftpdlib.filesystems import UnixFilesystem
 from pyftpdlib.servers import ThreadedFTPServer
 from ftplib import FTP
 import socket
 import pickle
 import os
-import time
 import constants        # if highlighted - still don't care, it works
 
 ds1_ip = constants.ds1_ip
@@ -88,11 +84,6 @@ def start_ftp_server(handler):
     server.max_cons_per_ip = 5
     server.serve_forever()
 
-#
-# def client_storage(path):
-#     handler = MyFTPHandler(FTPHandler)
-#     start_ftp_server(handler)
-
 
 def start_replication(file, ip):
     ftp = FTP()
@@ -142,14 +133,9 @@ def storage_is_server(port):
         start_ds3.start()
         start = Thread(target=start_ftp_server, args=(handler,))
         start.start()
-        # start_ds2.join()
-        # start_ds3.join()
-        # start.join()
-        # # start.join()
         print("Server started")
         msg = "Server started"
         conn.send(pickle.dumps(msg))
-    # if data == 'Connect':
     elif data == "Replication":
         handler = NoRepFTPHandler
         start = Thread(target=start_ftp_server, args=(handler,))
@@ -159,7 +145,6 @@ def storage_is_server(port):
     elif data == "Download" or "Upload":
         msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
-        # path = pickle.loads(conn.recv(1024))start
 
         handler = MyFTPHandler
         start_ftp_server(handler)
@@ -167,7 +152,6 @@ def storage_is_server(port):
         msg = "error"
         conn.send(pickle.dumps(msg))
     conn.close()
-    # storage_is_server()
 
 
 if __name__ == '__main__':

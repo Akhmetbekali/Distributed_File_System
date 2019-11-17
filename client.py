@@ -38,25 +38,25 @@ def client_nameserver():
                 address = pickle.loads(client_socket.recv(1024))
                 ip = address.split(":")[0]
                 port = int(address.split(":")[1])
-                print(ip, port)
+                # print(ip, port)
                 print("Do you want to upload or download file?")
                 ans = input()
                 if ans == "Upload":
                     print("Enter uploading path ( '/' is current): ")
                     folder = input()
                     client_socket.send(pickle.dumps(folder))
+
                     ans = pickle.loads(client_socket.recv(1024))
                     print(ans)
                     if ans == "Enter the filename: ":
                         filename = input()
                         client_socket.send(pickle.dumps(filename))
                         print(folder + filename)
-                        uploadfile(ip, port, filename)
+                        hashed_path = pickle.loads(client_socket.recv(1024))
+                        uploadfile(ip, port, hashed_path)
                     else:
                         print(ans)
                         print(folder)
-                    # client_storage(ip, port)
-                # client_socket.send(pickle.dumps("Uploaded"))
 
         message = input(" -> ")
 

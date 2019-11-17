@@ -1,3 +1,4 @@
+import hashlib
 import os
 import pickle
 import socket
@@ -52,37 +53,28 @@ def client_server():
             elif data == "Move file":
                 movefile(conn)
             elif data == "Initialize":
-                # storage_address = "192.168.0.136:8000"  # IP of Data storage
-                # msg = \
                 msg = start_storage(data, ds1_ip, ns_ds_port)
-                # conn.send(pickle.dumps(msg))
-                # start_storage(data, ds2_ip, ns_ds_port)
-                # conn.send(pickle.dumps(msg))
-                # msg = start_storage(data, ds3_ip, ns_ds_port)
                 conn.send(pickle.dumps(msg))
 
             elif data == "Connect":
-                # current_dir = os.getcwd()
-                # print("Connected " + current_dir)
-                # msg = "Enter destination path: "
-                # conn.send(pickle.dumps(msg))
-                # destination_path = pickle.loads(conn.recv(1024))
-                # msg = "Enter source path: "
-                # conn.send(pickle.dumps(msg))
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
-                print(pickle.loads(conn.recv(1024)))
+                pickle.loads(conn.recv(1024))
                 msg = "{}:{}".format(ds1_ip, ftp_port)
                 conn.send(pickle.dumps(msg))
 
                 directory = pickle.loads(conn.recv(1024))
                 print(directory)
+
                 print(os.path.isdir(directory))
                 if os.path.isdir(directory) is True:
                     msg = "Enter the filename: "
                     conn.send(pickle.dumps(msg))
                     filename = pickle.loads(conn.recv(1024))
                     print(filename)
+                    path = directory + filename
+                    hashed_path = calc_hash(path)
+                    conn.send(hashed_path)
                 else:
                     conn.send(pickle.dumps("No such directory"))
                     print(directory)
@@ -278,6 +270,10 @@ def fileread(conn, filename):
             return
 
 
+def calc_hash(file_path):
+    return hashlib.sha256(file_path.encode()).hexdigest()
+
+
 def start_storage(msg, ip, port):
     # host = ds1_ip
     # port = ns_ds_port
@@ -312,7 +308,7 @@ def storage_server(message, path):
 
 
 def ping(connection):
-    hostname = connection # example
+    hostname = connection
     response = os.system("ping -c 1 " + hostname)
 
     # and then check the response...
