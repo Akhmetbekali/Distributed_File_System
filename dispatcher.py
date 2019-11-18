@@ -228,10 +228,16 @@ def rmfile(conn):  # TODO in DS recreate file
         msg = name + " is directory"
         conn.send(pickle.dumps(msg))
     else:
-        path_content.remove(name)
-        file_structure[current_folder] = path_content
-        remove_file("{}{}".format(current_folder, name))
-        conn.send(pickle.dumps("Success"))
+        msg = "Delete file"
+        status, response = storage_server(msg, calc_hash("{}{}".format(current_folder, name)))
+        if status == "Success":
+            path_content.remove(name)
+            file_structure[current_folder] = path_content
+            remove_file("{}{}".format(current_folder, name))
+            conn.send(pickle.dumps("Success"))
+        else:
+            msg = "Error: {}".format(response)
+            conn.send(pickle.dumps(msg))
 
 
 def file_info(conn):

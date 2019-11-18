@@ -132,6 +132,17 @@ def create_file(file):
         return file_info
 
 
+def delete_file(file):
+    path = homedir + "/" + file
+    if os.path.isfile(path):
+        os.remove(path)
+        msg = "Deleted"
+        return msg
+    else:
+        msg = "No such file"
+        return msg
+
+
 def copy_file(source, destination):
     source_path = homedir + "/" + source
     destination_path = homedir + "/" + destination
@@ -210,6 +221,11 @@ def storage_is_server(port):
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
             file_info = create_file(path)
+            conn.send(pickle.dumps(file_info))
+        elif data == "Delete file":
+            conn.send(pickle.dumps("Ready"))
+            path = pickle.loads(conn.recv(1024))
+            file_info = delete_file(path)
             conn.send(pickle.dumps(file_info))
         elif data == "Copy file":
             conn.send(pickle.dumps("Ready"))
