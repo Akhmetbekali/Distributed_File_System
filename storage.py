@@ -122,9 +122,9 @@ def uploadfile(ftp, file):
 
 def create_file(file):
     # TODO: create file and return hash + file info
-    # path = os.getcwd() + "/" + file
+    path = homedir + "/" + file
     try:
-        open(file, 'x')
+        open(path, 'x')
         print("Succesfully created")
     except FileExistsError:
         print("Already exists")
