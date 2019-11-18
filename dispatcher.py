@@ -19,7 +19,7 @@ ds_ds_tcp_port = constants.ds_ds_tcp_port
 ds_ns_port = constants.ds_ns_port
 
 file_structure = dict()  # format - path : list of directories and files inside
-current_folder = ""  # string with the path of current folder
+current_folder = "/"  # string with the path of current folder
 servers = []  # list of Data Servers, format of server: [ip: str, free space: float]
 path_map = dict()  # format - path/filename : [hashcode, file info, availability]
 
@@ -367,7 +367,6 @@ if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory", "Connect", "Help"]
-    current_folder = "/"
     file_structure.update({'/': []})
     print(file_structure)
     client_server()
