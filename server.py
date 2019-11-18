@@ -14,6 +14,7 @@ ftp_port = constants.ftp_port
 ns_client_port = constants.ns_client_port
 ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
+ds_ns_port = constants.ds_ns_port
 
 
 def client_server():
@@ -75,10 +76,9 @@ def client_server():
                     path = directory + filename
                     hashed_path = calc_hash(path)
                     conn.send(pickle.dumps(hashed_path))
-                    port = ns_client_port
 
                     ds_ns = socket.socket()
-                    ds_ns.bind(('', port))
+                    ds_ns.bind(('', ds_ns_port))
 
                     ds_ns.listen(2)
                     ds_ns, address = ds_ns.accept()
