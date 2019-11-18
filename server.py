@@ -75,6 +75,20 @@ def client_server():
                     path = directory + filename
                     hashed_path = calc_hash(path)
                     conn.send(pickle.dumps(hashed_path))
+                    port = ns_client_port
+
+                    ds_ns = socket.socket()
+                    ds_ns.bind(('', port))
+
+                    ds_ns.listen(2)
+                    ds_ns, address = ds_ns.accept()
+                    print("Connection from: " + str(address))
+                    while True:
+                        info = pickle.loads(conn.recv(1024))
+                        if not info:
+                            break
+                        print(info)
+                    ds_ns.close()
                 else:
                     conn.send(pickle.dumps("No such directory"))
                     print(directory)
@@ -275,19 +289,21 @@ def calc_hash(file_path):
 
 
 def start_storage(msg, ip, port):
-    # host = ds1_ip
-    # port = ns_ds_port
     client_socket = socket.socket()
     client_socket.connect((ip, port))
     client_socket.send(pickle.dumps(msg))
     data = pickle.loads(client_socket.recv(1024))
     if data == "Server started":
         return data
+    if data == "Ready to Upload":
+        msg = "Uploading..."
+        client_socket.send(pickle.dumps(msg))
+        print(pickle.loads(client_socket.recv(1024)))
     else:
         return "Error"
 
 
-def storage_server(message, path):
+def storage_server(message, path):  # Not using
     host = ds1_ip
     port = ns_ds_port
     client_socket = socket.socket()
@@ -300,6 +316,7 @@ def storage_server(message, path):
         print("OK")
         return "OK"
     elif data == "Ready to Upload" or "Ready to Download":
+        print("Line 305")
         client_socket.send(pickle.dumps(path))
     else:
         print("Error")
