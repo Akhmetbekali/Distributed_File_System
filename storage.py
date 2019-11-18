@@ -135,8 +135,10 @@ def create_file(file):
 
 def copy_file(source, destination):
     # TODO: make a copy of file and return hash + file info
+    source_path = homedir + "/" + source
+    destination_path = homedir + "/" + destination
     try:
-        shutil.copy(source, destination)
+        shutil.copy(source_path, destination_path)
         print("File copied successfully.")
         file_info = os.stat(destination)
         return file_info
