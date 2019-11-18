@@ -45,12 +45,12 @@ class MyFTPHandler(FTPHandler):
         # file = hashlib.sha256(file.encode()).hexdigest()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
         rep2 = Thread(target=start_replication, args=(file, ds3_ip))
-        rep3 = Thread(target=file_info, args=(file,))
+        rep3 = Thread(target=file_info, args=(file, ns_ip))
         print("Trying by thread")
         rep3.start()
         rep1.start()
         rep2.start()
-        rep3.join()
+        # rep3.join()
         rep1.join()
         rep2.join()
         
@@ -74,10 +74,10 @@ class NoRepFTPHandler(FTPHandler):
         self.server.close_when_done()
 
 
-def file_info(file):
+def file_info(file, ip):
     print("Creating connection DS -> NS")
     ds_ns = socket.socket()
-    ds_ns.connect((ns_ip, ds_ns_port))
+    ds_ns.connect((ip, ds_ns_port))
     message = os.stat(file)
     ds_ns.send(pickle.dumps(message))
     ds_ns.close()

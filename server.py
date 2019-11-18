@@ -97,6 +97,7 @@ def client_server():
 
 
 def DS_NS_connection():
+    print("DSNS in server")
     ds_ns = socket.socket()
     ds_ns.bind(('', ds_ns_port))
     ds_ns.listen(2)
