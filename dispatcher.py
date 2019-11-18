@@ -167,7 +167,7 @@ def remove_dir(dir):
     print("Line 169")
     print(dir)
     print(file_structure)
-    for elem in path_content:
+    for elem in reversed(path_content):
         path = "{}{}/".format(dir, elem)
         print(path)
         if file_structure.get(path) is not None:
