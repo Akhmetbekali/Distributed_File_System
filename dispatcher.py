@@ -197,7 +197,7 @@ def opendir(conn):
         conn.send(pickle.dumps(err))
 
 
-def mkfile(conn):  # TODO: NS-DS connection & send empty file
+def mkfile(conn):
     conn.send(pickle.dumps("\nEnter the name of file"))
     filename = pickle.loads(conn.recv(1024))
     path_content = file_structure.get(current_folder)
@@ -247,7 +247,7 @@ def file_info(conn):
         conn.send(pickle.dumps(msg))
 
 
-def copy_file(conn):  # TODO NS->DS copy & change filename according to new hashcode
+def copy_file(conn):
     conn.send(pickle.dumps("\nEnter the path of file"))
     source = pickle.loads(conn.recv(1024))
     conn.send(pickle.dumps("\nEnter the name of file"))
@@ -289,7 +289,7 @@ def consid_file(response, path, filename):  # TODO write file info after Uploadi
     path_map["{}{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
 
 
-def move_file(conn):  # TODO NS->DS rename file according to new hash
+def move_file(conn):
     conn.send(pickle.dumps("\nEnter the path of file"))
     source = pickle.loads(conn.recv(1024))
     conn.send(pickle.dumps("\nEnter the name of file"))

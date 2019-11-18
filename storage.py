@@ -121,7 +121,6 @@ def uploadfile(ftp, file):
 
 
 def create_file(file):
-    # TODO: create file and return hash + file info
     path = homedir + "/" + file
     try:
         open(path, 'x')
@@ -134,7 +133,6 @@ def create_file(file):
 
 
 def copy_file(source, destination):
-    # TODO: make a copy of file and return hash + file info
     source_path = homedir + "/" + source
     destination_path = homedir + "/" + destination
     try:
@@ -153,7 +151,6 @@ def copy_file(source, destination):
 
 
 def move_file(source, destination):
-    # TODO: make a copy of file and return hash + file info
     source_path = homedir + "/" + source
     destination_path = homedir + "/" + destination
     os.rename(source_path, destination_path)
