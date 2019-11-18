@@ -166,12 +166,15 @@ def rmdir(conn):
 def remove_dir(conn, dir):
     path_content = file_structure.get(dir)
     print("Line 169")
+    print(dir)
+    print(file_structure)
     for elem in path_content:
         if file_structure.get("{}{}/".format(dir, elem)) is not None:
             remove_dir(conn, "{}{}/".format(dir, elem))
+            file_structure.pop(dir)
         else:
             remove_file(conn, elem, dir)
-    file_structure.pop(dir)
+    # file_structure.pop(dir)
 
 
 def remove_file(conn, name, path):
