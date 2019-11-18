@@ -84,7 +84,7 @@ def client_server():
                     ds_ns, address = ds_ns.accept()
                     print("Connection from: " + str(address))
                     while True:
-                        info = pickle.loads(conn.recv(1024))
+                        info = pickle.loads(ds_ns.recv(1024))
                         if not info:
                             break
                         print(info)

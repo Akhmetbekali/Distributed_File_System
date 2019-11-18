@@ -39,6 +39,8 @@ class MyFTPHandler(FTPHandler):
 
     def on_file_received(self, file):
         print("File received {}".format(file))
+
+        file_info(file)
         self.server.close_when_done()
         # file = hashlib.sha256(file.encode()).hexdigest()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
@@ -47,7 +49,6 @@ class MyFTPHandler(FTPHandler):
         rep2.start()
         rep1.join()
         rep2.join()
-        file_info(file)
         
     
 class NoRepFTPHandler(FTPHandler):
@@ -70,10 +71,8 @@ class NoRepFTPHandler(FTPHandler):
 
 
 def file_info(file):
-    host = ns_ip
-    port = ds_ns_port
     ds_ns = socket.socket()
-    ds_ns.connect((host, port))
+    ds_ns.connect((ns_ip, ds_ns_port))
     message = os.stat(file)
     ds_ns.send(pickle.dumps(message))
     ds_ns.close()
