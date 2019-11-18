@@ -164,6 +164,9 @@ def rmdir(conn):
 
 def remove_dir(dir):
     path_content = file_structure.get(dir)
+    print("Line 169")
+    print(dir)
+    print(file_structure)
     for elem in path_content:
         path = "{}{}/".format(dir, elem)
         print(path)
@@ -190,6 +193,7 @@ def remove_file(name, path):
         msg = "Delete file"
         status, response = storage_server(msg, calc_hash("{}{}".format(path, name)))
         if status == "Success":
+            print("Line190")
             path_content.remove(name)
             file_structure[path] = path_content
             path_map.pop("{}{}".format(path, name))
