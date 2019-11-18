@@ -85,7 +85,6 @@ def file_info_met(file, ip):
 
 
 def start_ftp_server(handler):
-    homedir = os.path.abspath("./Storage")
     if not os.path.isdir(homedir):
         os.mkdir(homedir)
     if not os.path.isfile("{}/test.txt".format(homedir)):
@@ -221,6 +220,7 @@ def storage_is_server(port):
 
 
 if __name__ == '__main__':
+    homedir = os.path.abspath("./Storage")
     ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
     ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
     ns_ds.start()
