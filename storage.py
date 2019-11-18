@@ -218,6 +218,8 @@ def storage_is_server(port):
             clear_ds2.start()
             clear_ds3 = Thread(target=start_storage, args=("Clear2", ds3_ip, ds_ds_tcp_port))
             clear_ds3.start()
+            msg = "Clear"
+            conn.send(pickle.dumps(msg))
         elif data == "Clear2":
             os.system("sudo rm -r Storage/* -f")
         else:
