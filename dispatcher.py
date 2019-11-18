@@ -357,7 +357,8 @@ def ping(connection):
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory", "Connect"]
+                "Make directory", "Delete directory", "Connect", "Help"]
     current_folder = "/"
+    file_structure["/"] = []
     client_server()
 
