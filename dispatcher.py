@@ -1,21 +1,97 @@
-import socket
-import pickle
 import hashlib
+import os
+import pickle
+import socket
+import shutil
+import constants  # if highlighted - still don't care, it works
 
-file_structure = dict()     # format - path : list of directories and files inside
-current_folder = ""         # string with the path of current folder
-servers = []                # list of Data Servers, format of server: [ip: str, free space: float]
-path_map = dict()           # format - path/filename : [hashcode, file info, availability]
+ds1_ip = constants.ds1_ip
+ds2_ip = constants.ds2_ip
+ds3_ip = constants.ds3_ip
+ns_ip = constants.ns_ip
+client_ip = constants.client_ip
+ftp_port = constants.ftp_port
+ns_client_port = constants.ns_client_port
+ns_ds_port = constants.ns_ds_port
+ds_ds_tcp_port = constants.ds_ds_tcp_port
 
-
-def calc_hash(file_path):
-    return hashlib.sha256(file_path.encode()).hexdigest()
+file_structure = dict()  # format - path : list of directories and files inside
+current_folder = ""  # string with the path of current folder
+servers = []  # list of Data Servers, format of server: [ip: str, free space: float]
+path_map = dict()  # format - path/filename : [hashcode, file info, availability]
 
 
 def get_server_connection():
-    connection = socket.socket
-    server_num = 0
-    return connection, server_num
+    conn = socket.socket
+    return conn
+
+
+def client_server():
+    host = ns_ip
+    port = ns_client_port
+
+    server_socket = socket.socket()
+    server_socket.bind(('', port))
+
+    server_socket.listen(2)
+    conn, address = server_socket.accept()
+    print("Connection from: " + str(address))
+
+    while True:
+        data = pickle.loads(conn.recv(1024))
+        if not data:
+            break
+
+        if any(x == data for x in messages) is True:
+            if data == "Make directory":
+                mkdir(conn)
+            elif data == "Delete directory":
+                rmdir(conn)
+            elif data == "Read directory":
+                readdir(conn)
+            elif data == "Open directory":
+                opendir(conn)
+            elif data == "Create file":
+                mkfile(conn)
+            elif data == "Delete file":
+                rmfile(conn)
+            elif data == "File info":
+                file_info(conn)
+            elif data == "Copy file":
+                copy_file(conn)
+            elif data == "Move file":
+                move_file(conn)
+            elif data == "Initialize":
+                msg = start_storage(data, ds1_ip, ns_ds_port)
+                conn.send(pickle.dumps(msg))
+
+            elif data == "Connect":
+                msg = "IP:"
+                conn.send(pickle.dumps(msg))
+                pickle.loads(conn.recv(1024))
+                msg = "{}:{}".format(ds1_ip, ftp_port)
+                conn.send(pickle.dumps(msg))
+
+                directory = pickle.loads(conn.recv(1024))
+                print(directory)
+
+                print(os.path.isdir(directory))
+                if os.path.isdir(directory) is True:
+                    msg = "Enter the filename: "
+                    conn.send(pickle.dumps(msg))
+                    filename = pickle.loads(conn.recv(1024))
+                    print(filename)
+                    path = directory + filename
+                    hashed_path = calc_hash(path)
+                    conn.send(pickle.dumps(hashed_path))
+                else:
+                    conn.send(pickle.dumps("No such directory"))
+                    print(directory)
+        else:
+            data = "No such command"
+            conn.send(pickle.dumps(data))
+
+    conn.close()
 
 
 def mkdir(conn):
@@ -46,7 +122,7 @@ def rmdir(conn):
 def remove_dir(dir):
     path_content = file_structure.get(dir)
     for elem in path_content:
-        if file_structure.get("{}/{}/".format(dir, elem)):
+        if file_structure.get("{}/{}".format(dir, elem)):
             remove_dir("{}/{}".format(dir, elem))
         else:
             remove_file("{}/{}".format(dir, elem))
@@ -58,50 +134,64 @@ def remove_file(file_path):
 
 
 def readdir(conn):
-    name = current_folder
-    if file_structure.get(name):
-        dir_list = file_structure.get(name)
-        if len(dir_list) == 0:
+    dir = current_folder
+    if file_structure.get(dir):
+        path_content = file_structure.get(dir)
+        if len(path_content) == 0:
             conn.send(pickle.dumps("Empty directory"))
         else:
-            data = pickle.dumps(dir_list)
+            data = pickle.dumps(path_content)
             conn.send(data)
     else:
-        err = "No such file or directory: " + name
+        err = "No such file or directory: " + dir
         conn.send(pickle.dumps(err))
 
 
 def opendir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
-    name = pickle.loads(conn.recv(1024))
-    if file_structure.get(name):
+    dir = pickle.loads(conn.recv(1024))
+    if file_structure.get(dir):
         global current_folder
-        current_folder = name
-        conn.send(pickle.dumps(file_structure.get(name)))
+        current_folder = dir
+        conn.send(pickle.dumps(file_structure.get(dir)))
     else:
-        err = "No such file or directory: " + name
+        err = "No such file or directory: " + dir
         conn.send(pickle.dumps(err))
 
 
-# def mkfile(conn):
-#     conn.send(pickle.dumps("\nEnter the name of file"))
-#     filename = pickle.loads(conn.recv(1024))
-#     path_content = file_structure.get(current_folder)
-#     if filename in path_content:
-#         msg = "Already exists"
-#         conn.send(pickle.dumps(msg))
-#     else:
-#         ds = get_server_connection()
-#         msg = "Create file"
-#         ds.send(pickle.dumps(msg))
-#         response = pickle.loads(ds.recv(1024))
-#         if response == "Success":
-#             path_content.append(filename)
-#             file_structure[current_folder] = path_content
-#             conn.send(pickle.dumps(response))
-#         else:
-#             msg = "Error: {}".format(response)
-#             conn.send(pickle.dumps(msg))
+def mkfile(conn):
+    conn.send(pickle.dumps("\nEnter the name of file"))
+    filename = pickle.loads(conn.recv(1024))
+    path = os.getcwd() + "/" + filename
+    try:
+        open(path, 'x')
+        msg = "Succesfully created"
+        conn.send(pickle.dumps(msg))
+    except FileExistsError:
+        msg = "Already exists"
+        conn.send(pickle.dumps(msg))
+        pass
+
+
+def mkfile(conn):
+    conn.send(pickle.dumps("\nEnter the name of file"))
+    filename = pickle.loads(conn.recv(1024))
+    path_content = file_structure.get(current_folder)
+    if filename in path_content:
+        msg = "Already exists"
+        conn.send(pickle.dumps(msg))
+    else:
+        ds = get_server_connection()
+        msg = "Create file"
+        ds.send(pickle.dumps(msg))
+        response = pickle.loads(ds.recv(1024))
+        if response == "Success":
+            path_content.append(filename)
+            file_structure[current_folder] = path_content
+            conn.send(pickle.dumps(response))
+        else:
+            msg = "Error: {}".format(response)
+            conn.send(pickle.dumps(msg))
 
 
 def rmfile(conn):
@@ -134,7 +224,7 @@ def file_info(conn):
         conn.send(pickle.dumps(msg))
 
 
-def copyfile(conn):
+def copy_file(conn):
     conn.send(pickle.dumps("\nEnter the path of file"))
     source = pickle.loads(conn.recv(1024))
     conn.send(pickle.dumps("\nEnter the name of file"))
@@ -153,10 +243,14 @@ def copyfile(conn):
         msg = "No such file: {}".format(filename)
         conn.send(pickle.dumps(msg))
         return
+    if path_map.get("{}/{}".format(destination, filename)):
+        msg = "File already exist"
+        conn.send(pickle.dumps(msg))
+        return
     ds = get_server_connection()
     ds.send(pickle.dumps("Copy file"))
     pickle.loads(ds.recv(1024))
-    ds.send(path_map.get("{}/{}".format(source, filename))[0])
+    ds.send(pickle.dumps(path_map.get("{}/{}".format(source, filename))[0]))
     response = pickle.loads(ds.recv(1024))
     consid_file(response)
     dest_content = file_structure[destination]
@@ -166,45 +260,100 @@ def copyfile(conn):
 
 def consid_file(response):
     path, filename, hashcode, file_info = response
-    path_map["{}/{}".format(path, filename)] = [hashcode, file_info, [True]*3]
+    path_map["{}/{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
 
 
-def movefile(conn):
+def move_file(conn):
     conn.send(pickle.dumps("\nEnter the path of file"))
     source = pickle.loads(conn.recv(1024))
     data = source.split("/")
     filename = data[-1]
+    source = str(data[0])
+    for dir in range(1, len(data) - 1):
+        source += "/{}".format(dir)
 
     conn.send(pickle.dumps("\nEnter the destination of file"))
     destination = pickle.loads(conn.recv(1024))
-    if os.path.isdir(destination) is False:
-        destination = os.getcwd() + destination
-
-    if os.path.exists(destination) is False:
-        msg = "Error in destination path"
+    if not file_structure.get(source):
+        msg = "No such directory: {}".format(source)
         conn.send(pickle.dumps(msg))
-    elif os.path.exists(source) is False:
-        msg = "Error in source path"
+        return
+    if not file_structure.get(destination):
+        msg = "No such directory: {}".format(destination)
         conn.send(pickle.dumps(msg))
-    elif destination == source:
-        msg = "Source and destination represents the same file."
+        return
+    if not path_map.get("{}/{}".format(source, filename)):
+        msg = "No such file: {}".format(filename)
         conn.send(pickle.dumps(msg))
-    elif os.path.isdir(destination):
-        checker = destination + "/" + filename
-        if os.path.isfile(checker):
-            msg = "File already exists"
-            conn.send(pickle.dumps(msg))
-        else:
-            shutil.move(source, destination)
-            msg = "File moved successfully."
-            conn.send(pickle.dumps(msg))
-    elif os.path.isfile(destination):
+        return
+    if path_map.get("{}/{}".format(destination, filename)):
         msg = "File already exists"
         conn.send(pickle.dumps(msg))
+        return
+    source_content = file_structure.get(source)
+    source_content.remove(filename)
+    file_structure[source] = source_content
+    destination_content = file_structure.get(destination)
+    destination_content.append(filename)
+    file_structure[destination] = destination_content
+    file = path_map.pop("{}/{}".format(source, filename))
+    path_map["{}/{}".format(destination, filename)] = file
+    msg = "File moved successfully."
+    conn.send(pickle.dumps(msg))
+
+
+def calc_hash(file_path):
+    return hashlib.sha256(file_path.encode()).hexdigest()
+
+
+def start_storage(msg, ip, port):
+    # host = ds1_ip
+    # port = ns_ds_port
+    client_socket = socket.socket()
+    client_socket.connect((ip, port))
+    client_socket.send(pickle.dumps(msg))
+    data = pickle.loads(client_socket.recv(1024))
+    if data == "Server started":
+        return data
     else:
-        shutil.move(source, destination)
-        msg = "File moved successfully."
-        conn.send(pickle.dumps(msg))
+        return "Error"
 
 
-print(calc_hash("/home/file.txt"))
+def storage_server(message, path):
+    host = ds1_ip
+    port = ns_ds_port
+    client_socket = socket.socket()
+    client_socket.connect((host, port))
+
+    client_socket.send(pickle.dumps(message))
+
+    data = pickle.loads(client_socket.recv(1024))
+    if data == "Clear":
+        print("OK")
+        return "OK"
+    elif data == "Ready to Upload" or "Ready to Download":
+        client_socket.send(pickle.dumps(path))
+    else:
+        print("Error")
+        return data
+    client_socket.close()
+
+
+def ping(connection):
+    hostname = connection
+    response = os.system("ping -c 1 " + hostname)
+
+    # and then check the response...
+    if response == 0:
+        print(hostname, 'is up!')
+    else:
+        print(hostname, 'is down!')
+
+
+if __name__ == '__main__':
+    messages = ["Initialize", "Create file", "Delete file",
+                "File info", "Copy file", "Move file", "Open directory", "Read directory",
+                "Make directory", "Delete directory", "Connect"]
+    current_folder = "/"
+    client_server()
+
