@@ -141,7 +141,19 @@ def rmdir(conn):
         msg = "Can't remove root directory"
         conn.send(pickle.dumps(msg))
     if file_structure.get("{}{}/".format(current_folder, name)) is not None:
+        path_list = name.split("/")
+        deleted_path = path_list[-1]
+        if len(path_list) == 1:
+            path = "/"
+        else:
+            path = ""
+            for i in range(len(path_list) - 1):
+                path += "/{}".format(path_list[i])
+            path += "/"
         remove_dir(conn, "{}{}/".format(current_folder, name))
+        path_content = file_structure.get(path)
+        path_content.remove(deleted_path)
+        file_structure[path] = path_content
         msg = "Directory deleted"
         print(file_structure)
         conn.send(pickle.dumps(msg))
