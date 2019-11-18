@@ -243,12 +243,16 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
     filename = pickle.loads(conn.recv(1024))
     conn.send(pickle.dumps("\nEnter the destination of file"))
     destination = pickle.loads(conn.recv(1024))
+    if source != "/":
+        source = "/{}/".format(source)
+    if destination != "/":
+        destination = "/{}/".format(destination)
     if not file_structure.get(source):
         msg = "No such directory: {}".format(source)
         conn.send(pickle.dumps(msg))
         return
     if not file_structure.get(destination):
-        msg = "No such directory: {}".format(destination)
+        msg = "No such directory: {}/".format(destination)
         conn.send(pickle.dumps(msg))
         return
     if not path_map.get("{}{}".format(source, filename)):
@@ -276,14 +280,14 @@ def consid_file(response, path, filename):  # TODO write file info after Uploadi
 def move_file(conn):  # TODO NS->DS rename file according to new hash
     conn.send(pickle.dumps("\nEnter the path of file"))
     source = pickle.loads(conn.recv(1024))
-    data = source.split("/")
-    filename = data[-1]
-    source = ""
-    for dir in range(0, len(data) - 1):
-        source += "{}/".format(dir)
-
+    conn.send(pickle.dumps("\nEnter the name of file"))
+    filename = pickle.loads(conn.recv(1024))
     conn.send(pickle.dumps("\nEnter the destination of file"))
     destination = pickle.loads(conn.recv(1024))
+    if source != "/":
+        source = "/{}/".format(source)
+    if destination != "/":
+        destination = "/{}/".format(destination)
     if not file_structure.get(source):
         msg = "No such directory: {}".format(source)
         conn.send(pickle.dumps(msg))
