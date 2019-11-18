@@ -150,6 +150,7 @@ def rmdir(conn):
             for i in range(len(path_list) - 1):
                 path += "/{}".format(path_list[i])
             path += "/"
+        print(name)
         remove_dir(conn, "{}{}/".format(current_folder, name))
         path_content = file_structure.get(path)
         path_content.remove(deleted_path)
