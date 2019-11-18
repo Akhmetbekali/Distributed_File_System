@@ -122,14 +122,14 @@ def uploadfile(ftp, file):
 
 def create_file(file):
     path = homedir + "/" + file
-    try:
-        open(path, 'x')
+    if os.path.isfile(path):
+        msg = "Already exists"
+        return msg
+    else:
+        open(path, 'w')
         print("Succesfully created")
         file_info = os.stat(path)
         return file_info
-    except FileExistsError:
-        msg = "Already exists"
-        return msg
 
 
 def copy_file(source, destination):
