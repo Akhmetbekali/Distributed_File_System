@@ -302,6 +302,7 @@ def storage_server(message, path):  # Not using
         print("OK")
         return "OK"
     elif data == "Ready to Upload" or "Ready to Download":
+        print("Line 305")
         client_socket.send(pickle.dumps(path))
     else:
         print("Error")
