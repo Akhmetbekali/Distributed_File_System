@@ -64,6 +64,15 @@ def client_server():
                 conn.send(pickle.dumps(msg))
             elif data == "Help":
                 conn.send(pickle.dumps(messages))
+            elif data == "Clear":
+                file_structure.clear()
+                file_structure["/"] = []
+                path_map.clear()
+                msg = "Clear"
+                response = storage_server(msg, "")
+                if response == "Success":
+                    msg = "Cleared"
+                    conn.send(pickle.dumps(msg))
             elif data == "Connect":
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
@@ -249,19 +258,19 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
         source = "/{}/".format(source)
     if destination != "/":
         destination = "/{}/".format(destination)
-    if not file_structure.get(source):
+    if file_structure.get(source) is None:
         msg = "No such directory: {}".format(source)
         conn.send(pickle.dumps(msg))
         return
-    if not file_structure.get(destination):
-        msg = "No such directory: {}/".format(destination)
+    if file_structure.get(destination) is None:
+        msg = "No such directory: {}".format(destination)
         conn.send(pickle.dumps(msg))
         return
-    if not path_map.get("{}{}".format(source, filename)):
+    if path_map.get("{}{}".format(source, filename)) is None:
         msg = "No such file: {}".format(filename)
         conn.send(pickle.dumps(msg))
         return
-    if path_map.get("{}{}".format(destination, filename)):
+    if path_map.get("{}{}".format(destination, filename)) is not None:
         msg = "File already exist"
         conn.send(pickle.dumps(msg))
         return
@@ -290,19 +299,19 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
         source = "/{}/".format(source)
     if destination != "/":
         destination = "/{}/".format(destination)
-    if not file_structure.get(source):
+    if file_structure.get(source) is None:
         msg = "No such directory: {}".format(source)
         conn.send(pickle.dumps(msg))
         return
-    if not file_structure.get(destination):
+    if file_structure.get(destination) is None:
         msg = "No such directory: {}".format(destination)
         conn.send(pickle.dumps(msg))
         return
-    if not path_map.get("{}{}".format(source, filename)):
+    if path_map.get("{}{}".format(source, filename)) is None:
         msg = "No such file: {}".format(filename)
         conn.send(pickle.dumps(msg))
         return
-    if path_map.get("{}{}".format(destination, filename)):
+    if path_map.get("{}{}".format(destination, filename)) is not None:
         msg = "File already exists"
         conn.send(pickle.dumps(msg))
         return
@@ -367,7 +376,7 @@ def ping(connection):
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory", "Connect", "Help"]
+                "Make directory", "Delete directory", "Connect", "Clear", "Help"]
     file_structure.update({'/': []})
     print(file_structure)
     client_server()
