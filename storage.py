@@ -48,7 +48,7 @@ class MyFTPHandler(FTPHandler):
         rep1.join()
         rep2.join()
         print(os.stat(file))
-        return os.stat(file)
+        file_info = os.stat(file)
         
     
 class NoRepFTPHandler(FTPHandler):
@@ -139,7 +139,7 @@ def storage_is_server(port):
         start.start()
         print("Server started")
         msg = "Server started"
-        print("Line142", handler)
+        print("Line142", file_info)
         conn.send(pickle.dumps(msg))
     elif data == "Replication":
         handler = NoRepFTPHandler
@@ -163,6 +163,7 @@ def storage_is_server(port):
 
 
 if __name__ == '__main__':
+    file_info = ''
     ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
     ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
     ns_ds.start()
