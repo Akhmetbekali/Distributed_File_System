@@ -38,7 +38,7 @@ class MyFTPHandler(FTPHandler):
 
     def on_file_received(self, file):
         print("File received {}".format(file))
-        
+        print(os.stat(file))
         self.server.close_when_done()
         file = hashlib.sha256(file.encode()).hexdigest()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
@@ -47,6 +47,8 @@ class MyFTPHandler(FTPHandler):
         rep2.start()
         rep1.join()
         rep2.join()
+        print(os.stat(file))
+        return os.stat(file)
         
     
 class NoRepFTPHandler(FTPHandler):
@@ -66,7 +68,7 @@ class NoRepFTPHandler(FTPHandler):
     def on_file_received(self, file):
         print("File replicated {}".format(file))
         self.server.close_when_done()
-        
+
     
 def start_ftp_server(handler):
     homedir = os.path.abspath("./Storage")
@@ -144,12 +146,14 @@ def storage_is_server(port):
         start.start()
         msg = "Server started"
         conn.send(pickle.dumps(msg))
-    elif data == "Download" or "Upload":
+    elif data == "Upload":
         msg = "Ready to " + data
         conn.send(pickle.dumps(msg))
-
         handler = MyFTPHandler
         start_ftp_server(handler)
+        pickle.loads(conn.recv(1024))
+        conn.send(pickle.dumps(handler))
+
     else:
         msg = "error"
         conn.send(pickle.dumps(msg))

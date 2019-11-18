@@ -275,19 +275,21 @@ def calc_hash(file_path):
 
 
 def start_storage(msg, ip, port):
-    # host = ds1_ip
-    # port = ns_ds_port
     client_socket = socket.socket()
     client_socket.connect((ip, port))
     client_socket.send(pickle.dumps(msg))
     data = pickle.loads(client_socket.recv(1024))
     if data == "Server started":
         return data
+    if data == "Ready to Upload":
+        msg = "Uploading..."
+        client_socket.send(pickle.dumps(msg))
+        print(pickle.loads(client_socket.recv(1024)))
     else:
         return "Error"
 
 
-def storage_server(message, path):
+def storage_server(message, path):  # Not using
     host = ds1_ip
     port = ns_ds_port
     client_socket = socket.socket()
