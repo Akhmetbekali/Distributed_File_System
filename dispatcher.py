@@ -150,11 +150,12 @@ def rmdir(conn):
             for i in range(len(path_list) - 1):
                 path += "/{}".format(path_list[i])
             path += "/"
-        print(name)
+        print("Line153", name)
+        print(path)
         remove_dir(conn, "{}{}/".format(current_folder, name))
-        path_content = file_structure.get(path)
+        path_content = file_structure.get("{}{}/".format(current_folder, path))
         path_content.remove(deleted_path)
-        file_structure[path] = path_content
+        file_structure["{}{}/".format(current_folder, name)] = path_content
         msg = "Directory deleted"
         print(file_structure)
         conn.send(pickle.dumps(msg))
