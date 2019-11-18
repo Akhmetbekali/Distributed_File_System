@@ -121,7 +121,10 @@ def mkdir(conn):
         msg = "Already exists"
         conn.send(pickle.dumps(msg))
     else:
-        file_structure["{}/{}".format(current_folder, name)] = []
+        file_structure["{}{}/".format(current_folder, name)] = []
+        path_content = file_structure.get(current_folder)
+        path_content.append(name)
+        file_structure[current_folder] = path_content
         msg = "Successfully created"
         print(file_structure)
         conn.send(pickle.dumps(msg))
@@ -130,9 +133,9 @@ def mkdir(conn):
 def rmdir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     name = pickle.loads(conn.recv(1024))
-    if file_structure.get("{}/{}".format(current_folder, name)) is not None:
-        remove_dir("{}/{}".format(current_folder, name))
-        file_structure.pop("{}/{}".format(current_folder, name))
+    if file_structure.get("{}{}/".format(current_folder, name)) is not None:
+        remove_dir("{}{}/".format(current_folder, name))
+        file_structure.pop("{}{}/".format(current_folder, name))
         msg = "Directory deleted"
         print(file_structure)
         conn.send(pickle.dumps(msg))
@@ -145,10 +148,10 @@ def rmdir(conn):
 def remove_dir(dir):
     path_content = file_structure.get(dir)
     for elem in path_content:
-        if file_structure.get("{}/{}".format(dir, elem)) is not None:
-            remove_dir("{}/{}".format(dir, elem))
+        if file_structure.get("{}{}/".format(dir, elem)) is not None:
+            remove_dir("{}{}/".format(dir, elem))
         else:
-            remove_file("{}/{}".format(dir, elem))
+            remove_file("{}{}".format(dir, elem))
     file_structure.pop(dir)
 
 
@@ -159,7 +162,7 @@ def remove_file(file_path):
 def readdir(conn):
     dir = current_folder
     print(current_folder)
-    if file_structure.get(str(dir)) is not None:
+    if file_structure.get(dir) is not None:
         print(file_structure)
         path_content = file_structure.get(dir)
         if len(path_content) == 0:
@@ -177,9 +180,9 @@ def opendir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     print(file_structure)
     dir = pickle.loads(conn.recv(1024))
-    if file_structure.get(str(dir)) is not None:
+    if file_structure.get("{}/".format(dir)) is not None:
         global current_folder
-        current_folder = dir
+        current_folder = "{}/".format(dir)
         conn.send(pickle.dumps(current_folder))
     else:
         err = "No such file or directory: " + dir
@@ -214,20 +217,20 @@ def rmfile(conn):  # TODO in DS recreate file
     if name not in path_content:
         msg = "No such file"
         conn.send(pickle.dumps(msg))
-    elif file_structure.get("{}/{}".format(current_folder, name)) is not None:
+    elif file_structure.get("{}{}/".format(current_folder, name)) is not None:
         msg = name + " is directory"
         conn.send(pickle.dumps(msg))
     else:
         path_content.remove(name)
         file_structure[current_folder] = path_content
-        remove_file("{}/{}".format(current_folder, name))
+        remove_file("{}{}".format(current_folder, name))
         conn.send(pickle.dumps("Success"))
 
 
 def file_info(conn):
     conn.send(pickle.dumps("\nEnter the name of file"))
     filename = pickle.loads(conn.recv(1024))
-    path = "{}/{}".format(current_folder, filename)
+    path = "{}{}".format(current_folder, filename)
     if path_map.get(path):
         info = path_map.get(path)[1]
         data = pickle.dumps(info)
@@ -252,18 +255,18 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
         msg = "No such directory: {}".format(destination)
         conn.send(pickle.dumps(msg))
         return
-    if not path_map.get("{}/{}".format(source, filename)):
+    if not path_map.get("{}{}".format(source, filename)):
         msg = "No such file: {}".format(filename)
         conn.send(pickle.dumps(msg))
         return
-    if path_map.get("{}/{}".format(destination, filename)):
+    if path_map.get("{}{}".format(destination, filename)):
         msg = "File already exist"
         conn.send(pickle.dumps(msg))
         return
     ds = get_server_connection()
     ds.send(pickle.dumps("Copy file"))
     pickle.loads(ds.recv(1024))
-    ds.send(pickle.dumps(path_map.get("{}/{}".format(source, filename))[0]))
+    ds.send(pickle.dumps(path_map.get("{}{}".format(source, filename))[0]))
     response = pickle.loads(ds.recv(1024))
     consid_file(response)
     dest_content = file_structure[destination]
@@ -273,7 +276,7 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
 
 def consid_file(response):  # TODO write file info after Uploading and replication
     path, filename, hashcode, file_info = response
-    path_map["{}/{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
+    path_map["{}{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
 
 
 def move_file(conn):  # TODO NS->DS rename file according to new hash
@@ -281,9 +284,9 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
     source = pickle.loads(conn.recv(1024))
     data = source.split("/")
     filename = data[-1]
-    source = str(data[0])
-    for dir in range(1, len(data) - 1):
-        source += "/{}".format(dir)
+    source = ""
+    for dir in range(0, len(data) - 1):
+        source += "{}/".format(dir)
 
     conn.send(pickle.dumps("\nEnter the destination of file"))
     destination = pickle.loads(conn.recv(1024))
@@ -295,11 +298,11 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
         msg = "No such directory: {}".format(destination)
         conn.send(pickle.dumps(msg))
         return
-    if not path_map.get("{}/{}".format(source, filename)):
+    if not path_map.get("{}{}".format(source, filename)):
         msg = "No such file: {}".format(filename)
         conn.send(pickle.dumps(msg))
         return
-    if path_map.get("{}/{}".format(destination, filename)):
+    if path_map.get("{}{}".format(destination, filename)):
         msg = "File already exists"
         conn.send(pickle.dumps(msg))
         return
@@ -309,8 +312,8 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
     destination_content = file_structure.get(destination)
     destination_content.append(filename)
     file_structure[destination] = destination_content
-    file = path_map.pop("{}/{}".format(source, filename))
-    path_map["{}/{}".format(destination, filename)] = file
+    file = path_map.pop("{}{}".format(source, filename))
+    path_map["{}{}".format(destination, filename)] = file
     msg = "File moved successfully."
     conn.send(pickle.dumps(msg))
 
@@ -365,9 +368,8 @@ if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory", "Connect", "Help"]
-    current_folder = ""
-    file_structure.update({'': ''})
-    #file_structure["/"] = ''
+    current_folder = "/"
+    file_structure.update({'/': []})
     print(file_structure)
     client_server()
 
