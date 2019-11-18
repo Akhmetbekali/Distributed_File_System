@@ -177,10 +177,10 @@ def storage_is_server(port):
             conn.close()
         if data == 'Initialize':
             handler = MyFTPHandler
-            start_ds2 = Thread(target=start_storage, args=("Replication", ds2_ip, ds_ds_tcp_port))
-            start_ds2.start()
-            start_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
-            start_ds3.start()
+            clear_ds2 = Thread(target=start_storage, args=("Replication", ds2_ip, ds_ds_tcp_port))
+            clear_ds2.start()
+            clear_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
+            clear_ds3.start()
             start = Thread(target=start_ftp_server, args=(handler,))
             start.start()
             print("Server started")
@@ -212,8 +212,14 @@ def storage_is_server(port):
             destination = path.split(" ")[1]
             file_info = copy_file(source, destination)
             conn.send(pickle.dumps(file_info))
-
-
+        elif data == "Clear":
+            os.system("sudo rm -r Storage/* -f")
+            clear_ds2 = Thread(target=start_storage, args=("Clear2", ds2_ip, ds_ds_tcp_port))
+            clear_ds2.start()
+            clear_ds3 = Thread(target=start_storage, args=("Clear2", ds3_ip, ds_ds_tcp_port))
+            clear_ds3.start()
+        elif data == "Clear2":
+            os.system("sudo rm -r Storage/* -f")
         else:
             msg = "error"
             conn.send(pickle.dumps(msg))
