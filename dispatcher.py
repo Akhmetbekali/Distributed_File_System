@@ -128,6 +128,9 @@ def mkdir(conn):
 def rmdir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     name = pickle.loads(conn.recv(1024))
+    if name == "/":
+        msg = "Can't remove root directory"
+        conn.send(pickle.dumps(msg))
     if file_structure.get("{}{}/".format(current_folder, name)) is not None:
         remove_dir("{}{}/".format(current_folder, name))
         msg = "Directory deleted"
@@ -155,7 +158,6 @@ def remove_file(file_path):
 
 def readdir(conn):
     dir = current_folder
-    print(current_folder)
     if file_structure.get(dir) is not None:
         print(file_structure)
         path_content = file_structure.get(dir)
@@ -178,7 +180,7 @@ def opendir(conn):
     if dir == "/":
         current_folder = "/"
         conn.send(pickle.dumps(current_folder))
-    if file_structure.get("/{}/".format(dir)) is not None:
+    elif file_structure.get("/{}/".format(dir)) is not None:
         current_folder = "/{}/".format(dir)
         conn.send(pickle.dumps(current_folder))
     else:
