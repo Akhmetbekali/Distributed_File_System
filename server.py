@@ -77,11 +77,11 @@ def client_server():
                     conn.send(pickle.dumps(hashed_path))
                     port = ns_client_port
 
-                    server_socket = socket.socket()
-                    server_socket.bind(('', port))
+                    ds_ns = socket.socket()
+                    ds_ns.bind(('', port))
 
-                    server_socket.listen(2)
-                    ds_ns, address = server_socket.accept()
+                    ds_ns.listen(2)
+                    ds_ns, address = ds_ns.accept()
                     print("Connection from: " + str(address))
                     while True:
                         info = pickle.loads(conn.recv(1024))
