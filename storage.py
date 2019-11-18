@@ -140,7 +140,7 @@ def copy_file(source, destination):
     try:
         shutil.copy(source_path, destination_path)
         print("File copied successfully.")
-        file_info = os.stat(destination)
+        file_info = os.stat(destination_path)
         return file_info
     except shutil.SameFileError:
         print("Source and destination represents the same file.")
