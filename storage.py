@@ -40,11 +40,15 @@ class MyFTPHandler(FTPHandler):
     def on_file_received(self, file):
         print("File received {}".format(file))
 
-        file_info(file)
         self.server.close_when_done()
+        file_info(file)
         # file = hashlib.sha256(file.encode()).hexdigest()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
         rep2 = Thread(target=start_replication, args=(file, ds3_ip))
+        rep3 = Thread(target=file_info, args=(file,))
+        print("Trying by thread")
+        rep3.start()
+        rep3.join()
         rep1.start()
         rep2.start()
         rep1.join()
