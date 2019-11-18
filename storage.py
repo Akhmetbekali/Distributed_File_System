@@ -135,8 +135,10 @@ def create_file(file):
 
 def copy_file(source, destination):
     # TODO: make a copy of file and return hash + file info
+    source_path = homedir + "/" + source
+    destination_path = homedir + "/" + destination
     try:
-        shutil.copyfile(source, destination)
+        shutil.copy(source_path, destination_path)
         print("File copied successfully.")
         file_info = os.stat(destination)
         return file_info
@@ -151,6 +153,7 @@ def copy_file(source, destination):
 
     except:
         print("Error occurred while copying file.")
+
 
 def start_storage(msg, ip, port):
     client_socket = socket.socket()
