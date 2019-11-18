@@ -288,6 +288,8 @@ def copy_file(conn):
     dest_content = file_structure[destination]
     dest_content.append(filename)
     file_structure[destination] = dest_content
+    msg = "File copied successfully."
+    conn.send(pickle.dumps(msg))
 
 
 def consid_file(response, path, filename):  # TODO write file info after Uploading and replication
