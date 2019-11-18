@@ -192,7 +192,7 @@ def mkfile(conn):  # TODO: NS-DS connection & send empty file
         conn.send(pickle.dumps(msg))
     else:
         msg = "Create file"
-        status, response = storage_server(msg, "{}{}".format(current_folder, filename))
+        status, response = storage_server(msg, calc_hash("{}{}".format(current_folder, filename)))
         if status == "Success":
             path_content.append(filename)
             file_structure[current_folder] = path_content
@@ -255,8 +255,8 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
         msg = "File already exist"
         conn.send(pickle.dumps(msg))
         return
-    status, response = storage_server("Copy file", "{} {}".format("{}{}".format(source, filename),
-                                                                  "{}{}".format(destination, filename)))
+    status, response = storage_server("Copy file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
+                                                                  calc_hash("{}{}".format(destination, filename))))
     consid_file(response)
     dest_content = file_structure[destination]
     dest_content.append(filename)
@@ -264,7 +264,8 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
 
 
 def consid_file(response, path, filename):  # TODO write file info after Uploading and replication
-    hashcode, file_info = response
+    file_info = response
+    hashcode = calc_hash("{}{}".format(path, filename))
     path_map["{}{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
 
 
@@ -295,8 +296,8 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
         msg = "File already exists"
         conn.send(pickle.dumps(msg))
         return
-    status, response = storage_server("Copy file", "{} {}".format("{}{}".format(source, filename),
-                                                                  "{}{}".format(destination, filename)))
+    status, response = storage_server("Copy file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
+                                                                  calc_hash("{}{}".format(destination, filename))))
     consid_file(response)
     dest_content = file_structure[destination]
     dest_content.append(filename)
