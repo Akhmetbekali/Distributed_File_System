@@ -58,6 +58,8 @@ def client_server():
             elif data == "Initialize":
                 msg = start_storage(data, ds1_ip, ns_ds_port)
                 conn.send(pickle.dumps(msg))
+            elif data == "Help":
+                conn.send(pickle.dumps(messages))
 
             elif data == "Connect":
                 msg = "IP:"
@@ -343,6 +345,6 @@ def ping(connection):
 if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory", "Connect"]
+                "Make directory", "Delete directory", "Connect", "Help"]
     os.chdir("Storage")
     client_server()

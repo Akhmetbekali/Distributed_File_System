@@ -3,6 +3,8 @@ import os
 import pickle
 import socket
 import shutil
+from threading import Thread
+
 import constants  # if highlighted - still don't care, it works
 
 ds1_ip = constants.ds1_ip
@@ -14,6 +16,7 @@ ftp_port = constants.ftp_port
 ns_client_port = constants.ns_client_port
 ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
+ds_ns_port = constants.ds_ns_port
 
 file_structure = dict()  # format - path : list of directories and files inside
 current_folder = ""  # string with the path of current folder
@@ -64,7 +67,8 @@ def client_server():
             elif data == "Initialize":
                 msg = start_storage(data, ds1_ip, ns_ds_port)
                 conn.send(pickle.dumps(msg))
-
+            elif data == "Help":
+                conn.send(pickle.dumps(messages))
             elif data == "Connect":
                 msg = "IP:"
                 conn.send(pickle.dumps(msg))
@@ -84,6 +88,10 @@ def client_server():
                     path = directory + filename
                     hashed_path = calc_hash(path)
                     conn.send(pickle.dumps(hashed_path))
+                    print("Waiting for connection from DS")
+                    ds_ns = Thread(target=DS_NS_connection, args=())
+                    ds_ns.start()
+                    ds_ns.join()
                 else:
                     conn.send(pickle.dumps("No such directory"))
                     print(directory)
@@ -92,6 +100,18 @@ def client_server():
             conn.send(pickle.dumps(data))
 
     conn.close()
+
+
+def DS_NS_connection():
+    print("DSNS in server")
+    ds_ns = socket.socket()
+    ds_ns.bind(('', ds_ns_port))
+    ds_ns.listen(2)
+    ds_ns, address = ds_ns.accept()
+    print("Connection from: " + str(address))
+    info = pickle.loads(ds_ns.recv(1024))
+    print(info)
+    ds_ns.close()
 
 
 def mkdir(conn):
@@ -159,21 +179,7 @@ def opendir(conn):
         conn.send(pickle.dumps(err))
 
 
-def mkfile(conn):
-    conn.send(pickle.dumps("\nEnter the name of file"))
-    filename = pickle.loads(conn.recv(1024))
-    path = os.getcwd() + "/" + filename
-    try:
-        open(path, 'x')
-        msg = "Succesfully created"
-        conn.send(pickle.dumps(msg))
-    except FileExistsError:
-        msg = "Already exists"
-        conn.send(pickle.dumps(msg))
-        pass
-
-
-def mkfile(conn):
+def mkfile(conn):  # TODO: NS-DS connection & send empty file
     conn.send(pickle.dumps("\nEnter the name of file"))
     filename = pickle.loads(conn.recv(1024))
     path_content = file_structure.get(current_folder)
@@ -194,7 +200,7 @@ def mkfile(conn):
             conn.send(pickle.dumps(msg))
 
 
-def rmfile(conn):
+def rmfile(conn):  # TODO in DS recreate file
     conn.send(pickle.dumps("\nEnter the name of file"))
     name = pickle.loads(conn.recv(1024))
     path_content = file_structure.get(current_folder)
@@ -224,7 +230,7 @@ def file_info(conn):
         conn.send(pickle.dumps(msg))
 
 
-def copy_file(conn):
+def copy_file(conn):  # TODO NS->DS copy & change filename according to new hashcode
     conn.send(pickle.dumps("\nEnter the path of file"))
     source = pickle.loads(conn.recv(1024))
     conn.send(pickle.dumps("\nEnter the name of file"))
@@ -258,12 +264,12 @@ def copy_file(conn):
     file_structure[destination] = dest_content
 
 
-def consid_file(response):
+def consid_file(response):  # TODO write file info after Uploading and replication
     path, filename, hashcode, file_info = response
     path_map["{}/{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
 
 
-def move_file(conn):
+def move_file(conn):  # TODO NS->DS rename file according to new hash
     conn.send(pickle.dumps("\nEnter the path of file"))
     source = pickle.loads(conn.recv(1024))
     data = source.split("/")
@@ -307,8 +313,6 @@ def calc_hash(file_path):
 
 
 def start_storage(msg, ip, port):
-    # host = ds1_ip
-    # port = ns_ds_port
     client_socket = socket.socket()
     client_socket.connect((ip, port))
     client_socket.send(pickle.dumps(msg))
