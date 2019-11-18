@@ -38,7 +38,6 @@ class MyFTPHandler(FTPHandler):
 
     def on_file_received(self, file):
         print("File received {}".format(file))
-        print(os.stat(file))
         self.server.close_when_done()
         # file = hashlib.sha256(file.encode()).hexdigest()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
@@ -48,6 +47,7 @@ class MyFTPHandler(FTPHandler):
         rep1.join()
         rep2.join()
         print(os.stat(file))
+        global file_info
         file_info = os.stat(file)
         
     
