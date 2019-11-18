@@ -180,7 +180,7 @@ def opendir(conn):
     if file_structure.get(str(dir)) is not None:
         global current_folder
         current_folder = dir
-        conn.send(pickle.dumps(file_structure.get(dir)))
+        conn.send(pickle.dumps(current_folder))
     else:
         err = "No such file or directory: " + dir
         conn.send(pickle.dumps(err))
@@ -366,7 +366,7 @@ if __name__ == '__main__':
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory", "Connect", "Help"]
     current_folder = ""
-    file_structure.update({'/': ''})
+    file_structure.update({'': ''})
     #file_structure["/"] = ''
     print(file_structure)
     client_server()
