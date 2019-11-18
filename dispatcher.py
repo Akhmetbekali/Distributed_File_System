@@ -366,7 +366,8 @@ if __name__ == '__main__':
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory", "Connect", "Help"]
     current_folder = ""
-    file_structure["/"] = ''
+    file_structure.update({'/': ''})
+    #file_structure["/"] = ''
     print(file_structure)
     client_server()
 
