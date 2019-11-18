@@ -180,9 +180,9 @@ def opendir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     print(file_structure)
     dir = pickle.loads(conn.recv(1024))
-    if file_structure.get("{}/".format(dir)) is not None:
+    if file_structure.get("/{}/".format(current_folder, dir)) is not None:
         global current_folder
-        current_folder = "{}/".format(dir)
+        current_folder = "/{}/".format(dir)
         conn.send(pickle.dumps(current_folder))
     else:
         err = "No such file or directory: " + dir
