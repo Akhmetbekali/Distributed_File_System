@@ -166,6 +166,7 @@ def rmdir(conn):
 
 def remove_dir(conn, dir):
     path_content = file_structure.get(dir)
+    print("Line 169")
     for elem in path_content:
         if file_structure.get("{}{}/".format(dir, elem)) is not None:
             remove_dir(conn, "{}{}/".format(dir, elem))
@@ -187,6 +188,7 @@ def remove_file(conn, name, path):
         msg = "Delete file"
         status, response = storage_server(msg, calc_hash("{}{}".format(path, name)))
         if status == "Success":
+            print("Line190")
             path_content.remove(name)
             file_structure[path] = path_content
             path_map.pop("{}{}".format(path, name))
