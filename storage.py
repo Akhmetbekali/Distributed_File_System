@@ -166,57 +166,58 @@ def start_storage(msg, ip, port):
 def storage_is_server(port):
     server_socket = socket.socket()
     server_socket.bind(('', port))
-    server_socket.listen(2)
-    conn, address = server_socket.accept()
-    print("Connection from: " + str(address))
+    while True:
+        server_socket.listen(2)
+        conn, address = server_socket.accept()
+        print("Connection from: " + str(address))
 
-    data = pickle.loads(conn.recv(1024))
+        data = pickle.loads(conn.recv(1024))
 
-    if not data:
+        if not data:
+            conn.close()
+        if data == 'Initialize':
+            handler = MyFTPHandler
+            start_ds2 = Thread(target=start_storage, args=("Replication", ds2_ip, ds_ds_tcp_port))
+            start_ds2.start()
+            start_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
+            start_ds3.start()
+            start = Thread(target=start_ftp_server, args=(handler,))
+            start.start()
+            print("Server started")
+            msg = "Server started"
+            conn.send(pickle.dumps(msg))
+        elif data == "Replication":
+            handler = NoRepFTPHandler
+            start = Thread(target=start_ftp_server, args=(handler,))
+            start.start()
+            msg = "Server started"
+            conn.send(pickle.dumps(msg))
+        elif data == "Upload":
+            print("Line 150")
+            msg = "Ready to " + data
+            conn.send(pickle.dumps(msg))
+            handler = MyFTPHandler
+            start_ftp_server(handler)
+            pickle.loads(conn.recv(1024))
+            conn.send(pickle.dumps(handler))
+        elif data == "Create file":
+            conn.send(pickle.dumps("Ready"))
+            path = pickle.loads(conn.recv(1024))
+            file_info = create_file(path)
+            conn.send(pickle.dumps(file_info))
+        elif data == "Copy file":
+            conn.send(pickle.dumps("Ready"))
+            path = pickle.loads(conn.recv(1024))
+            source = path.split(" ")[0]
+            destination = path.split(" ")[1]
+            file_info = copy_file(source, destination)
+            conn.send(pickle.dumps(file_info))
+
+
+        else:
+            msg = "error"
+            conn.send(pickle.dumps(msg))
         conn.close()
-    if data == 'Initialize':
-        handler = MyFTPHandler
-        start_ds2 = Thread(target=start_storage, args=("Replication", ds2_ip, ds_ds_tcp_port))
-        start_ds2.start()
-        start_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
-        start_ds3.start()
-        start = Thread(target=start_ftp_server, args=(handler,))
-        start.start()
-        print("Server started")
-        msg = "Server started"
-        conn.send(pickle.dumps(msg))
-    elif data == "Replication":
-        handler = NoRepFTPHandler
-        start = Thread(target=start_ftp_server, args=(handler,))
-        start.start()
-        msg = "Server started"
-        conn.send(pickle.dumps(msg))
-    elif data == "Upload":
-        print("Line 150")
-        msg = "Ready to " + data
-        conn.send(pickle.dumps(msg))
-        handler = MyFTPHandler
-        start_ftp_server(handler)
-        pickle.loads(conn.recv(1024))
-        conn.send(pickle.dumps(handler))
-    elif data == "Create file":
-        conn.send(pickle.dumps("Ready"))
-        path = pickle.loads(conn.recv(1024))
-        file_info = create_file(path)
-        conn.send(pickle.dumps(file_info))
-    elif data == "Copy file":
-        conn.send(pickle.dumps("Ready"))
-        path = pickle.loads(conn.recv(1024))
-        source = path.split(" ")[0]
-        destination = path.split(" ")[1]
-        file_info = copy_file(source, destination)
-        conn.send(pickle.dumps(file_info))
-
-
-    else:
-        msg = "error"
-        conn.send(pickle.dumps(msg))
-    conn.close()
 
 
 if __name__ == '__main__':
