@@ -315,12 +315,15 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
         msg = "File already exists"
         conn.send(pickle.dumps(msg))
         return
-    status, response = storage_server("Copy file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
+    status, response = storage_server("Move file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                   calc_hash("{}{}".format(destination, filename))))
     consid_file(response, destination, filename)
     dest_content = file_structure[destination]
     dest_content.append(filename)
     file_structure[destination] = dest_content
+    source_content = file_structure[source]
+    source_content.remove(filename)
+    file_structure[source] = source_content
     file = path_map.pop("{}{}".format(source, filename))
     path_map["{}{}".format(destination, filename)] = file
     msg = "File moved successfully."
