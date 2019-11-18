@@ -151,9 +151,6 @@ def copy_file(source, destination):
     except PermissionError:
         print("Permission denied.")
 
-    except:
-        print("Error occurred while copying file.")
-
 
 def start_storage(msg, ip, port):
     client_socket = socket.socket()
