@@ -71,6 +71,7 @@ class NoRepFTPHandler(FTPHandler):
 
 
 def file_info(file):
+    print("Creating connection DS -> NS")
     ds_ns = socket.socket()
     ds_ns.connect((ns_ip, ds_ns_port))
     message = os.stat(file)

@@ -76,19 +76,8 @@ def client_server():
                     path = directory + filename
                     hashed_path = calc_hash(path)
                     conn.send(pickle.dumps(hashed_path))
-
-                    ds_ns = socket.socket()
-                    ds_ns.bind(('', ds_ns_port))
-
-                    ds_ns.listen(2)
-                    ds_ns, address = ds_ns.accept()
-                    print("Connection from: " + str(address))
-                    while True:
-                        info = pickle.loads(ds_ns.recv(1024))
-                        if not info:
-                            break
-                        print(info)
-                    ds_ns.close()
+                    print("Waiting for connection from DS")
+                    DS_NS_connection()
                 else:
                     conn.send(pickle.dumps("No such directory"))
                     print(directory)
@@ -101,6 +90,20 @@ def client_server():
             conn.send(pickle.dumps(data))
 
     conn.close()
+
+
+def DS_NS_connection():
+    ds_ns = socket.socket()
+    ds_ns.bind(('', ds_ns_port))
+    ds_ns.listen(2)
+    ds_ns, address = ds_ns.accept()
+    print("Connection from: " + str(address))
+    while True:
+        info = pickle.loads(ds_ns.recv(1024))
+        print(info)
+        if not info:
+            break
+    ds_ns.close()
 
 
 def mkdir(conn):
