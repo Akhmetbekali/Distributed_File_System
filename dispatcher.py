@@ -175,6 +175,9 @@ def opendir(conn):
     print(file_structure)
     dir = pickle.loads(conn.recv(1024))
     global current_folder
+    if dir == "/":
+        current_folder = "/"
+        conn.send(pickle.dumps(current_folder))
     if file_structure.get("/{}/".format(dir)) is not None:
         current_folder = "/{}/".format(dir)
         conn.send(pickle.dumps(current_folder))
