@@ -150,13 +150,14 @@ def rmdir(conn):
         print("Line153", name)
         print(path)
         remove_dir(conn, "{}{}/".format(current_folder, name))
+
         path_content = file_structure.get("{}{}/".format(current_folder, path))
-        if path_content is not None:
-            path_content.remove(deleted_path)
-            file_structure["{}{}/".format(current_folder, name)] = path_content
-            msg = "Directory deleted"
-            print(file_structure)
-            conn.send(pickle.dumps(msg))
+        print(path_content)
+        path_content.remove(deleted_path)
+        file_structure["{}{}/".format(current_folder, name)] = path_content
+        msg = "Directory deleted"
+        print(file_structure)
+        conn.send(pickle.dumps(msg))
     else:
         msg = "No such directory"
         print(file_structure)
