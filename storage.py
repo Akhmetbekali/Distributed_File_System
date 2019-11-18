@@ -48,9 +48,9 @@ class MyFTPHandler(FTPHandler):
         rep3 = Thread(target=file_info, args=(file,))
         print("Trying by thread")
         rep3.start()
-        rep3.join()
         rep1.start()
         rep2.start()
+        rep3.join()
         rep1.join()
         rep2.join()
         
