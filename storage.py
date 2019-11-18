@@ -123,6 +123,13 @@ def uploadfile(ftp, file):
 
 def create_file(file):
     # TODO: create file and return hash + file info
+    # path = os.getcwd() + "/" + file
+    try:
+        open(file, 'x')
+        print("Succesfully created")
+    except FileExistsError:
+        print("Already exists")
+        pass
     file_info = os.stat(file)
     return file_info
 
