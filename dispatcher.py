@@ -147,8 +147,7 @@ def rmdir(conn):
         for i in range(len(path_list) - 1):
             path += "{}/".format(path_list[i])
         print("Line153", name)
-        print(path)
-        remove_dir(conn, "{}{}/".format(current_folder, name))
+        remove_dir("{}{}/".format(current_folder, name))
 
         path_content = file_structure.get("{}{}".format(current_folder, path))
         print(path_content)
@@ -163,17 +162,22 @@ def rmdir(conn):
         conn.send(pickle.dumps(msg))
 
 
-def remove_dir(conn, dir):
+def remove_dir(dir):
     path_content = file_structure.get(dir)
     for elem in path_content:
-        if file_structure.get("{}{}/".format(dir, elem)) is not None:
-            remove_dir(conn, "{}{}/".format(dir, elem))
+        path = "{}{}/".format(dir, elem)
+        print(path)
+        if file_structure.get(path) is not None:
+            print(elem + " is a directory")
+            remove_dir(path)
         else:
-            remove_file(conn, elem, dir)
+            print(elem + " is a file")
+            remove_file(elem, dir)
+    print("Delete " + dir)
     file_structure.pop(dir)
 
 
-def remove_file(conn, name, path):
+def remove_file(name, path):
     path_content = file_structure.get(path)
     if name not in path_content:
         print(name)
@@ -193,7 +197,6 @@ def remove_file(conn, name, path):
         else:
             msg = "Error: {}".format(response)
             return msg
-    return
 
 
 def readdir(conn):
