@@ -152,6 +152,15 @@ def copy_file(source, destination):
     return file_info
 
 
+def move_file(source, destination):
+    # TODO: make a copy of file and return hash + file info
+    source_path = homedir + "/" + source
+    destination_path = homedir + "/" + destination
+    os.rename(source_path, destination_path)
+    file_info = os.stat(destination_path)
+    return file_info
+
+
 def start_storage(msg, ip, port):
     client_socket = socket.socket()
     client_socket.connect((ip, port))
@@ -211,6 +220,13 @@ def storage_is_server(port):
             source = path.split(" ")[0]
             destination = path.split(" ")[1]
             file_info = copy_file(source, destination)
+            conn.send(pickle.dumps(file_info))
+        elif data == "Move file":
+            conn.send(pickle.dumps("Ready"))
+            path = pickle.loads(conn.recv(1024))
+            source = path.split(" ")[0]
+            destination = path.split(" ")[1]
+            file_info = move_file(source, destination)
             conn.send(pickle.dumps(file_info))
         elif data == "Clear":
             os.system("sudo rm -r Storage/* -f")
