@@ -194,17 +194,17 @@ def storage_is_server(port):
         pickle.loads(conn.recv(1024))
         conn.send(pickle.dumps(handler))
     elif data == "Create file":
-        conn.send(pickle.dumps("OK"))
+        conn.send(pickle.dumps("Ready"))
         path = pickle.loads(conn.recv(1024))
-        hashcode, file_info = create_file(path)
-        conn.send(pickle.dumps((hashcode, file_info)))
+        file_info = create_file(path)
+        conn.send(pickle.dumps(file_info))
     elif data == "Copy file":
-        conn.send(pickle.dumps("OK"))
+        conn.send(pickle.dumps("Ready"))
         path = pickle.loads(conn.recv(1024))
         source = path.split(" ")[0]
         destination = path.split(" ")[1]
-        hashcode, file_info = copy_file(source, destination)
-        conn.send(pickle.dumps((hashcode, file_info)))
+        file_info = copy_file(source, destination)
+        conn.send(pickle.dumps(file_info))
 
 
     else:
