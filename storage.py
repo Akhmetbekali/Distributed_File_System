@@ -50,7 +50,7 @@ class MyFTPHandler(FTPHandler):
         rep3.start()
         rep1.start()
         rep2.start()
-        # rep3.join()
+        rep3.join()
         rep1.join()
         rep2.join()
         
@@ -176,7 +176,6 @@ def storage_is_server(port):
 
 
 if __name__ == '__main__':
-    file_info = ''
     ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
     ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
     ns_ds.start()
