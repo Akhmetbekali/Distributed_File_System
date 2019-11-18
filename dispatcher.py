@@ -36,10 +36,10 @@ def client_server():
         print("Connection from: " + str(address))
 
         while True:
-            data = pickle.loads(conn.recv(1024))
+            data = conn.recv(1024)
             if not data:
                 break
-
+            data = pickle.loads(data)
             if any(x == data for x in messages) is True:
                 if data == "Make directory":
                     mkdir(conn)
