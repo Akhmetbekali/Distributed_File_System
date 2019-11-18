@@ -158,7 +158,7 @@ def remove_file(file_path):
 
 def readdir(conn):
     dir = current_folder
-    if file_structure.get(dir):
+    if file_structure.get(str(dir)):
         path_content = file_structure.get(dir)
         if len(path_content) == 0:
             conn.send(pickle.dumps("Empty directory"))
@@ -175,7 +175,7 @@ def opendir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     print(file_structure)
     dir = pickle.loads(conn.recv(1024))
-    if file_structure.get(dir):
+    if file_structure.get(str(dir)):
         global current_folder
         current_folder = dir
         conn.send(pickle.dumps(file_structure.get(dir)))
