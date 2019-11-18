@@ -280,6 +280,7 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
     dest_content = file_structure[destination]
     dest_content.append(filename)
     file_structure[destination] = dest_content
+    conn.send(pickle.dumps(status))
 
 
 def consid_file(response, path, filename):  # TODO write file info after Uploading and replication

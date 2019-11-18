@@ -141,15 +141,15 @@ def copy_file(source, destination):
         shutil.copy(source_path, destination_path)
         print("File copied successfully.")
         file_info = os.stat(destination_path)
-        return file_info
+
     except shutil.SameFileError:
-        print("Source and destination represents the same file.")
+        file_info = "Source and destination represents the same file."
 
     except IsADirectoryError:
-        print("Destination is a directory.")
-
+        file_info = "Destination is a directory."
     except PermissionError:
-        print("Permission denied.")
+        file_info = "Permission denied."
+    return file_info
 
 
 def start_storage(msg, ip, port):
