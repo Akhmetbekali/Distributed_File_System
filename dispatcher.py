@@ -141,7 +141,7 @@ def rmdir(conn):
         msg = "Can't remove root directory"
         conn.send(pickle.dumps(msg))
     if file_structure.get("{}{}/".format(current_folder, name)) is not None:
-        remove_dir("{}{}/".format(current_folder, name))
+        remove_dir(conn, "{}{}/".format(current_folder, name))
         msg = "Directory deleted"
         print(file_structure)
         conn.send(pickle.dumps(msg))
@@ -151,18 +151,36 @@ def rmdir(conn):
         conn.send(pickle.dumps(msg))
 
 
-def remove_dir(dir):
+def remove_dir(conn, dir):
     path_content = file_structure.get(dir)
     for elem in path_content:
         if file_structure.get("{}{}/".format(dir, elem)) is not None:
-            remove_dir("{}{}/".format(dir, elem))
+            remove_dir(conn, "{}{}/".format(dir, elem))
         else:
-            remove_file("{}{}".format(dir, elem))
+            remove_file(conn, elem)
     file_structure.pop(dir)
 
 
-def remove_file(file_path):
-    path_map.pop(file_path)
+def remove_file(conn, name):
+    path_content = file_structure.get(current_folder)
+    if name not in path_content:
+        msg = "No such file"
+        conn.send(pickle.dumps(msg))
+    elif file_structure.get("{}{}/".format(current_folder, name)) is not None:
+        msg = name + " is directory"
+        conn.send(pickle.dumps(msg))
+    else:
+        msg = "Delete file"
+        status, response = storage_server(msg, calc_hash("{}{}".format(current_folder, name)))
+        if status == "Success":
+            path_content.remove(name)
+            file_structure[current_folder] = path_content
+            path_map.pop("{}{}".format(current_folder, name))
+            conn.send(pickle.dumps("Success"))
+        else:
+            msg = "Error: {}".format(response)
+            conn.send(pickle.dumps(msg))
+    return
 
 
 def readdir(conn):
@@ -220,24 +238,7 @@ def mkfile(conn):
 def rmfile(conn):  # TODO in DS recreate file
     conn.send(pickle.dumps("\nEnter the name of file"))
     name = pickle.loads(conn.recv(1024))
-    path_content = file_structure.get(current_folder)
-    if name not in path_content:
-        msg = "No such file"
-        conn.send(pickle.dumps(msg))
-    elif file_structure.get("{}{}/".format(current_folder, name)) is not None:
-        msg = name + " is directory"
-        conn.send(pickle.dumps(msg))
-    else:
-        msg = "Delete file"
-        status, response = storage_server(msg, calc_hash("{}{}".format(current_folder, name)))
-        if status == "Success":
-            path_content.remove(name)
-            file_structure[current_folder] = path_content
-            remove_file("{}{}".format(current_folder, name))
-            conn.send(pickle.dumps("Success"))
-        else:
-            msg = "Error: {}".format(response)
-            conn.send(pickle.dumps(msg))
+    remove_file(conn, name)
 
 
 def file_info(conn):
@@ -286,7 +287,6 @@ def copy_file(conn):
     dest_content = file_structure[destination]
     dest_content.append(filename)
     file_structure[destination] = dest_content
-    conn.send(pickle.dumps(status))
 
 
 def consid_file(response, path, filename):  # TODO write file info after Uploading and replication
