@@ -123,6 +123,7 @@ def mkdir(conn):
     else:
         file_structure["{}/{}".format(current_folder, name)] = []
         msg = "Successfully created"
+        print(file_structure)
         conn.send(pickle.dumps(msg))
 
 
@@ -133,9 +134,11 @@ def rmdir(conn):
         remove_dir("{}/{}".format(current_folder, name))
         file_structure.pop("{}/{}".format(current_folder, name))
         msg = "Directory deleted"
+        print(file_structure)
         conn.send(pickle.dumps(msg))
     else:
         msg = "No such directory"
+        print(file_structure)
         conn.send(pickle.dumps(msg))
 
 
@@ -164,11 +167,13 @@ def readdir(conn):
             conn.send(data)
     else:
         err = "No such file or directory: " + dir
+        print(file_structure)
         conn.send(pickle.dumps(err))
 
 
 def opendir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
+    print(file_structure)
     dir = pickle.loads(conn.recv(1024))
     if file_structure.get(dir):
         global current_folder
@@ -358,7 +363,8 @@ if __name__ == '__main__':
     messages = ["Initialize", "Create file", "Delete file",
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory", "Connect", "Help"]
-    current_folder = "/"
-    file_structure["/"] = []
+    current_folder = ""
+    file_structure[""] = []
+    print(file_structure)
     client_server()
 
