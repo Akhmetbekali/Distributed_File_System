@@ -70,7 +70,7 @@ def client_server():
                 path_map.clear()
                 msg = "Clear"
                 response = storage_server(msg, "")
-                if response == "Success":
+                if response == "Clear":
                     msg = "Cleared"
                     conn.send(pickle.dumps(msg))
             elif data == "Connect":
@@ -356,6 +356,8 @@ def storage_server(message, path):
         response = pickle.loads(client_socket.recv(1024))
         client_socket.close()
         return "Success", response
+    elif data == "Clear":
+        return data
     else:
         print("Error")
         client_socket.close()
