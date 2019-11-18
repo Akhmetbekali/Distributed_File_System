@@ -386,9 +386,10 @@ def ping(connection):
 
 
 if __name__ == '__main__':
-    messages = ["Initialize", "Create file", "Delete file",
-                "File info", "Copy file", "Move file", "Open directory", "Read directory",
-                "Make directory", "Delete directory", "Connect", "Clear", "Help"]
+    messages = ["Initialize",
+                "Create file", "Delete file", "File info", "Copy file", "Move file",
+                "Open directory", "Read directory", "Make directory", "Delete directory",
+                "Connect", "Clear", "Help"]
     file_structure.update({'/': []})
     print(file_structure)
     client_server()
