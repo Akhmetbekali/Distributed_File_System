@@ -112,12 +112,24 @@ def start_replication(file, ip):
     return
 
 
-def uploadfile(ftp, file):  # Откуда запускаешь, оттуда и скачивает
+def uploadfile(ftp, file):
     print("Upload file " + file)
     filename = file.split('/')[-1]
 
     ftp.storbinary('STOR ' + filename, open("Storage/{}".format(filename), 'rb'))
     ftp.close()
+
+
+def create_file(file):
+    # TODO: create file and return hash + file info
+    hashcode, file_info = "", ""
+    return hashcode, file_info
+
+
+def copy_file(source, destination):
+    # TODO: make a copy of file and return hash + file info
+    hashcode, file_info = "", ""
+    return hashcode, file_info
 
 
 def start_storage(msg, ip, port):
@@ -167,6 +179,19 @@ def storage_is_server(port):
         start_ftp_server(handler)
         pickle.loads(conn.recv(1024))
         conn.send(pickle.dumps(handler))
+    elif data == "Create file":
+        conn.send(pickle.dumps("OK"))
+        path = pickle.loads(conn.recv(1024))
+        hashcode, file_info = create_file(path)
+        conn.send(pickle.dumps((hashcode, file_info)))
+    elif data == "Copy file":
+        conn.send(pickle.dumps("OK"))
+        path = pickle.loads(conn.recv(1024))
+        source = path.split(" ")[0]
+        destination = path.split(" ")[1]
+        hashcode, file_info = copy_file(source, destination)
+        conn.send(pickle.dumps((hashcode, file_info)))
+
 
     else:
         msg = "error"

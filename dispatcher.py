@@ -24,11 +24,6 @@ servers = []  # list of Data Servers, format of server: [ip: str, free space: fl
 path_map = dict()  # format - path/filename : [hashcode, file info, availability]
 
 
-def get_server_connection():
-    conn = socket.socket
-    return conn
-
-
 def client_server():
     host = ns_ip
     port = ns_client_port
@@ -196,11 +191,9 @@ def mkfile(conn):  # TODO: NS-DS connection & send empty file
         msg = "Already exists"
         conn.send(pickle.dumps(msg))
     else:
-        ds = get_server_connection()
         msg = "Create file"
-        ds.send(pickle.dumps(msg))
-        response = pickle.loads(ds.recv(1024))
-        if response == "Success":
+        status, response = storage_server(msg, "{}{}".format(current_folder, filename))
+        if status == "Success":
             path_content.append(filename)
             file_structure[current_folder] = path_content
             conn.send(pickle.dumps(response))
@@ -262,19 +255,16 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
         msg = "File already exist"
         conn.send(pickle.dumps(msg))
         return
-    ds = get_server_connection()
-    ds.send(pickle.dumps("Copy file"))
-    pickle.loads(ds.recv(1024))
-    ds.send(pickle.dumps(path_map.get("{}{}".format(source, filename))[0]))
-    response = pickle.loads(ds.recv(1024))
+    status, response = storage_server("Copy file", "{} {}".format("{}{}".format(source, filename),
+                                                                  "{}{}".format(destination, filename)))
     consid_file(response)
     dest_content = file_structure[destination]
     dest_content.append(filename)
     file_structure[destination] = dest_content
 
 
-def consid_file(response):  # TODO write file info after Uploading and replication
-    path, filename, hashcode, file_info = response
+def consid_file(response, path, filename):  # TODO write file info after Uploading and replication
+    hashcode, file_info = response
     path_map["{}{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
 
 
@@ -305,12 +295,12 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
         msg = "File already exists"
         conn.send(pickle.dumps(msg))
         return
-    source_content = file_structure.get(source)
-    source_content.remove(filename)
-    file_structure[source] = source_content
-    destination_content = file_structure.get(destination)
-    destination_content.append(filename)
-    file_structure[destination] = destination_content
+    status, response = storage_server("Copy file", "{} {}".format("{}{}".format(source, filename),
+                                                                  "{}{}".format(destination, filename)))
+    consid_file(response)
+    dest_content = file_structure[destination]
+    dest_content.append(filename)
+    file_structure[destination] = dest_content
     file = path_map.pop("{}{}".format(source, filename))
     path_map["{}{}".format(destination, filename)] = file
     msg = "File moved successfully."
@@ -341,15 +331,15 @@ def storage_server(message, path):
     client_socket.send(pickle.dumps(message))
 
     data = pickle.loads(client_socket.recv(1024))
-    if data == "Clear":
-        print("OK")
-        return "OK"
-    elif data == "Ready to Upload" or "Ready to Download":
+    if data == "Ready":
         client_socket.send(pickle.dumps(path))
+        response = pickle.loads(client_socket.recv(1024))
+        client_socket.close()
+        return "Success", response
     else:
         print("Error")
-        return data
-    client_socket.close()
+        client_socket.close()
+        return "Error", data
 
 
 def ping(connection):
