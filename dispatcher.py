@@ -135,7 +135,6 @@ def rmdir(conn):
     name = pickle.loads(conn.recv(1024))
     if file_structure.get("{}{}/".format(current_folder, name)) is not None:
         remove_dir("{}{}/".format(current_folder, name))
-        file_structure.pop("{}{}/".format(current_folder, name))
         msg = "Directory deleted"
         print(file_structure)
         conn.send(pickle.dumps(msg))
