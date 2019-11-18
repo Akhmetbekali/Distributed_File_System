@@ -129,7 +129,7 @@ def create_file(file):
     except FileExistsError:
         print("Already exists")
         pass
-    file_info = os.stat(file)
+    file_info = os.stat(path)
     return file_info
 
 
