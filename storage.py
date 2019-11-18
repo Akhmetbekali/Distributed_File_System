@@ -124,8 +124,7 @@ def uploadfile(ftp, file):
 def create_file(file):
     # TODO: create file and return hash + file info
     file_info = os.stat(file)
-    hashcode, file_info = "", ""
-    return hashcode, file_info
+    return file_info
 
 
 def copy_file(source, destination):
@@ -134,8 +133,7 @@ def copy_file(source, destination):
         shutil.copyfile(source, destination)
         print("File copied successfully.")
         file_info = os.stat(destination)
-        hashco
-        return hashcode, file_info
+        return file_info
     except shutil.SameFileError:
         print("Source and destination represents the same file.")
 

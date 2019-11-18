@@ -196,6 +196,7 @@ def mkfile(conn):  # TODO: NS-DS connection & send empty file
         if status == "Success":
             path_content.append(filename)
             file_structure[current_folder] = path_content
+            consid_file(response, current_folder, filename)
             conn.send(pickle.dumps(response))
         else:
             msg = "Error: {}".format(response)
@@ -257,7 +258,7 @@ def copy_file(conn):  # TODO NS->DS copy & change filename according to new hash
         return
     status, response = storage_server("Copy file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                   calc_hash("{}{}".format(destination, filename))))
-    consid_file(response)
+    consid_file(response, destination, filename)
     dest_content = file_structure[destination]
     dest_content.append(filename)
     file_structure[destination] = dest_content
@@ -298,7 +299,7 @@ def move_file(conn):  # TODO NS->DS rename file according to new hash
         return
     status, response = storage_server("Copy file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                   calc_hash("{}{}".format(destination, filename))))
-    consid_file(response)
+    consid_file(response, destination, filename)
     dest_content = file_structure[destination]
     dest_content.append(filename)
     file_structure[destination] = dest_content
