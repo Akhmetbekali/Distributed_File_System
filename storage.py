@@ -137,6 +137,7 @@ def delete_file(file):
     if os.path.isfile(path):
         os.remove(path)
         msg = "Deleted"
+        print(msg)
         return msg
     else:
         msg = "No such file"
