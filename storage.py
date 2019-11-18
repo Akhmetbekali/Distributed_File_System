@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import shutil
 from threading import Thread
 
 from pyftpdlib.authorizers import DummyAuthorizer
@@ -122,15 +123,30 @@ def uploadfile(ftp, file):
 
 def create_file(file):
     # TODO: create file and return hash + file info
+    file_info = os.stat(file)
     hashcode, file_info = "", ""
     return hashcode, file_info
 
 
 def copy_file(source, destination):
     # TODO: make a copy of file and return hash + file info
-    hashcode, file_info = "", ""
-    return hashcode, file_info
+    try:
+        shutil.copyfile(source, destination)
+        print("File copied successfully.")
+        file_info = os.stat(destination)
+        hashco
+        return hashcode, file_info
+    except shutil.SameFileError:
+        print("Source and destination represents the same file.")
 
+    except IsADirectoryError:
+        print("Destination is a directory.")
+
+    except PermissionError:
+        print("Permission denied.")
+
+    except:
+        print("Error occurred while copying file.")
 
 def start_storage(msg, ip, port):
     client_socket = socket.socket()
