@@ -117,7 +117,7 @@ def DS_NS_connection():
 def mkdir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     name = pickle.loads(conn.recv(1024))
-    if file_structure.get(current_folder + name) is None:
+    if file_structure.get(current_folder + name) is not None:
         msg = "Already exists"
         conn.send(pickle.dumps(msg))
     else:
@@ -130,7 +130,7 @@ def mkdir(conn):
 def rmdir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     name = pickle.loads(conn.recv(1024))
-    if file_structure.get("{}/{}".format(current_folder, name)) is None:
+    if file_structure.get("{}/{}".format(current_folder, name)) is not None:
         remove_dir("{}/{}".format(current_folder, name))
         file_structure.pop("{}/{}".format(current_folder, name))
         msg = "Directory deleted"
@@ -145,7 +145,7 @@ def rmdir(conn):
 def remove_dir(dir):
     path_content = file_structure.get(dir)
     for elem in path_content:
-        if file_structure.get("{}/{}".format(dir, elem)) is None:
+        if file_structure.get("{}/{}".format(dir, elem)) is not None:
             remove_dir("{}/{}".format(dir, elem))
         else:
             remove_file("{}/{}".format(dir, elem))
@@ -159,7 +159,7 @@ def remove_file(file_path):
 def readdir(conn):
     dir = current_folder
     print(current_folder)
-    if file_structure.get(str(dir)) is None:
+    if file_structure.get(str(dir)) is not None:
         print(file_structure)
         path_content = file_structure.get(dir)
         if len(path_content) == 0:
@@ -177,7 +177,7 @@ def opendir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
     print(file_structure)
     dir = pickle.loads(conn.recv(1024))
-    if file_structure.get(str(dir)) is None:
+    if file_structure.get(str(dir)) is not None:
         global current_folder
         current_folder = dir
         conn.send(pickle.dumps(file_structure.get(dir)))
@@ -214,7 +214,7 @@ def rmfile(conn):  # TODO in DS recreate file
     if name not in path_content:
         msg = "No such file"
         conn.send(pickle.dumps(msg))
-    elif file_structure.get("{}/{}".format(current_folder, name)) is None:
+    elif file_structure.get("{}/{}".format(current_folder, name)) is not None:
         msg = name + " is directory"
         conn.send(pickle.dumps(msg))
     else:
