@@ -158,7 +158,9 @@ def remove_file(file_path):
 
 def readdir(conn):
     dir = current_folder
+    print(current_folder)
     if file_structure.get(str(dir)):
+        print(file_structure)
         path_content = file_structure.get(dir)
         if len(path_content) == 0:
             conn.send(pickle.dumps("Empty directory"))
@@ -364,7 +366,7 @@ if __name__ == '__main__':
                 "File info", "Copy file", "Move file", "Open directory", "Read directory",
                 "Make directory", "Delete directory", "Connect", "Help"]
     current_folder = ""
-    file_structure[""] = []
+    file_structure["/"] = ''
     print(file_structure)
     client_server()
 
