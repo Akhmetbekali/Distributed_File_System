@@ -70,8 +70,8 @@ def uploadfile(host, port, hashed_path, filename):  # Откуда запуск�
     print(os.getcwd())
     print("FtP", ftp.pwd())
 
-    ftp.storbinary('STOR ' + filename, open(filename, 'rb'))
-    ftp.rename(filename, hashed_path)
+    ftp.storbinary('STOR ' + filename, open(hashed_path, 'rb'))
+    # ftp.rename(filename, hashed_path)
     ftp.close()
 
 
