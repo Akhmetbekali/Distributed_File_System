@@ -166,10 +166,10 @@ def remove_file(conn, name, path):
     if name not in path_content:
         print(name)
         msg = "No such file"
-        conn.send(pickle.dumps(msg))
+        return msg
     elif file_structure.get("{}{}/".format(path, name)) is not None:
         msg = name + " is directory"
-        conn.send(pickle.dumps(msg))
+        return msg
     else:
         msg = "Delete file"
         status, response = storage_server(msg, calc_hash("{}{}".format(path, name)))
@@ -177,10 +177,10 @@ def remove_file(conn, name, path):
             path_content.remove(name)
             file_structure[path] = path_content
             path_map.pop("{}{}".format(path, name))
-            conn.send(pickle.dumps("Success"))
+            return "Success"
         else:
             msg = "Error: {}".format(response)
-            conn.send(pickle.dumps(msg))
+            return msg
     return
 
 
@@ -239,7 +239,8 @@ def mkfile(conn):
 def rmfile(conn):  # TODO in DS recreate file
     conn.send(pickle.dumps("\nEnter the name of file"))
     name = pickle.loads(conn.recv(1024))
-    remove_file(conn, name, current_folder)
+    msg = remove_file(conn, name, current_folder)
+    conn.send(pickle.dumps(msg))
 
 
 def file_info(conn):
