@@ -30,80 +30,80 @@ def client_server():
 
     server_socket = socket.socket()
     server_socket.bind(('', port))
-
-    server_socket.listen(2)
-    conn, address = server_socket.accept()
-    print("Connection from: " + str(address))
-
     while True:
-        data = pickle.loads(conn.recv(1024))
-        if not data:
-            break
+        server_socket.listen(2)
+        conn, address = server_socket.accept()
+        print("Connection from: " + str(address))
 
-        if any(x == data for x in messages) is True:
-            if data == "Make directory":
-                mkdir(conn)
-            elif data == "Delete directory":
-                rmdir(conn)
-            elif data == "Read directory":
-                readdir(conn)
-            elif data == "Open directory":
-                opendir(conn)
-            elif data == "Create file":
-                mkfile(conn)
-            elif data == "Delete file":
-                rmfile(conn)
-            elif data == "File info":
-                file_info(conn)
-            elif data == "Copy file":
-                copy_file(conn)
-            elif data == "Move file":
-                move_file(conn)
-            elif data == "Initialize":
-                msg = start_storage(data, ds1_ip, ns_ds_port)
-                conn.send(pickle.dumps(msg))
-            elif data == "Help":
-                conn.send(pickle.dumps(messages))
-            elif data == "Clear":
-                file_structure.clear()
-                file_structure["/"] = []
-                path_map.clear()
-                msg = "Clear"
-                response = storage_server(msg, "")
-                if response == "Clear":
-                    msg = "Cleared"
+        while True:
+            data = pickle.loads(conn.recv(1024))
+            if not data:
+                break
+
+            if any(x == data for x in messages) is True:
+                if data == "Make directory":
+                    mkdir(conn)
+                elif data == "Delete directory":
+                    rmdir(conn)
+                elif data == "Read directory":
+                    readdir(conn)
+                elif data == "Open directory":
+                    opendir(conn)
+                elif data == "Create file":
+                    mkfile(conn)
+                elif data == "Delete file":
+                    rmfile(conn)
+                elif data == "File info":
+                    file_info(conn)
+                elif data == "Copy file":
+                    copy_file(conn)
+                elif data == "Move file":
+                    move_file(conn)
+                elif data == "Initialize":
+                    msg = start_storage(data, ds1_ip, ns_ds_port)
                     conn.send(pickle.dumps(msg))
-            elif data == "Connect":
-                msg = "IP:"
-                conn.send(pickle.dumps(msg))
-                pickle.loads(conn.recv(1024))
-                msg = "{}:{}".format(ds1_ip, ftp_port)
-                conn.send(pickle.dumps(msg))
-
-                directory = pickle.loads(conn.recv(1024))
-                print(directory)
-
-                print(os.path.isdir(directory))
-                if os.path.isdir(directory) is True:
-                    msg = "Enter the filename: "
+                elif data == "Help":
+                    conn.send(pickle.dumps(messages))
+                elif data == "Clear":
+                    file_structure.clear()
+                    file_structure["/"] = []
+                    path_map.clear()
+                    msg = "Clear"
+                    response = storage_server(msg, "")
+                    if response == "Clear":
+                        msg = "Cleared"
+                        conn.send(pickle.dumps(msg))
+                elif data == "Connect":
+                    msg = "IP:"
                     conn.send(pickle.dumps(msg))
-                    filename = pickle.loads(conn.recv(1024))
-                    print(filename)
-                    path = directory + filename
-                    hashed_path = calc_hash(path)
-                    conn.send(pickle.dumps(hashed_path))
-                    print("Waiting for connection from DS")
-                    ds_ns = Thread(target=DS_NS_connection, args=())
-                    ds_ns.start()
-                    ds_ns.join()
-                else:
-                    conn.send(pickle.dumps("No such directory"))
+                    pickle.loads(conn.recv(1024))
+                    msg = "{}:{}".format(ds1_ip, ftp_port)
+                    conn.send(pickle.dumps(msg))
+
+                    directory = pickle.loads(conn.recv(1024))
                     print(directory)
-        else:
-            data = "No such command"
-            conn.send(pickle.dumps(data))
 
-    conn.close()
+                    print(os.path.isdir(directory))
+                    if os.path.isdir(directory) is True:
+                        msg = "Enter the filename: "
+                        conn.send(pickle.dumps(msg))
+                        filename = pickle.loads(conn.recv(1024))
+                        print(filename)
+                        path = directory + filename
+                        hashed_path = calc_hash(path)
+                        conn.send(pickle.dumps(hashed_path))
+                        print("Waiting for connection from DS")
+                        ds_ns = Thread(target=DS_NS_connection, args=())
+                        ds_ns.start()
+                        ds_ns.join()
+                    else:
+                        conn.send(pickle.dumps("No such directory"))
+                        print(directory)
+            else:
+                data = "No such command"
+                conn.send(pickle.dumps(data))
+
+        conn.close()
 
 
 def DS_NS_connection():
