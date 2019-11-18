@@ -3,6 +3,8 @@ import os
 import pickle
 import socket
 import shutil
+from threading import Thread
+
 import constants        # if highlighted - still don't care, it works
 
 ds1_ip = constants.ds1_ip
@@ -77,7 +79,9 @@ def client_server():
                     hashed_path = calc_hash(path)
                     conn.send(pickle.dumps(hashed_path))
                     print("Waiting for connection from DS")
-                    DS_NS_connection()
+                    ds_ns = Thread(target=DS_NS_connection, args=())
+                    ds_ns.start()
+                    ds_ns.join()
                 else:
                     conn.send(pickle.dumps("No such directory"))
                     print(directory)
@@ -98,11 +102,8 @@ def DS_NS_connection():
     ds_ns.listen(2)
     ds_ns, address = ds_ns.accept()
     print("Connection from: " + str(address))
-    while True:
-        info = pickle.loads(ds_ns.recv(1024))
-        print(info)
-        if not info:
-            break
+    info = pickle.loads(ds_ns.recv(1024))
+    print(info)
     ds_ns.close()
 
 
