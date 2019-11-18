@@ -126,11 +126,11 @@ def create_file(file):
     try:
         open(path, 'x')
         print("Succesfully created")
+        file_info = os.stat(path)
+        return file_info
     except FileExistsError:
-        print("Already exists")
-        pass
-    file_info = os.stat(path)
-    return file_info
+        msg = "Already exists"
+        return msg
 
 
 def copy_file(source, destination):
