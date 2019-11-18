@@ -85,6 +85,7 @@ def start_ftp_server(handler):
     
     server = ThreadedFTPServer(('', ftp_port), handler)
 
+    print("Line88", file_info)
     server.max_cons_per_ip = 5
     server.serve_forever()
 
@@ -139,7 +140,6 @@ def storage_is_server(port):
         start.start()
         print("Server started")
         msg = "Server started"
-        print("Line142", file_info)
         conn.send(pickle.dumps(msg))
     elif data == "Replication":
         handler = NoRepFTPHandler
