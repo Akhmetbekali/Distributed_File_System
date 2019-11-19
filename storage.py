@@ -30,7 +30,7 @@ replication = False
 
 class MyFTPHandler(FTPHandler):
     def on_connect(self):
-        print("My IP: {}".format(self.masquerade_address))
+        print("My IP: {}".format(get_my_IP()))
         print("%s:%s connected" % (self.remote_ip, self.remote_port))
 
     def on_file_sent(self, file):
@@ -86,6 +86,16 @@ def file_info_met(file, ip):
     ds_ns.close()
 
 
+def get_my_IP():
+    try:
+        host_name = socket.gethostname()
+        host_ip = socket.gethostbyname(host_name)
+        print("Hostname :  ", host_name)
+        print("IP : ", host_ip)
+    except:
+        print("Unable to get Hostname and IP")
+
+
 def start_ftp_server(handler):
     if not os.path.isdir(homedir):
         os.mkdir(homedir)
@@ -96,6 +106,7 @@ def start_ftp_server(handler):
     authorizer = DummyAuthorizer()
     authorizer.add_user('user', '12345', homedir=homedir, perm='elradfmwMT')
     handler.authorizer = authorizer
+
     logging.basicConfig(filename='{}/test.txt'.format(homedir), level=logging.INFO)
     
     server = ThreadedFTPServer(('', ftp_port), handler)
@@ -265,6 +276,7 @@ def storage_is_server(port):
 
 if __name__ == '__main__':
     homedir = os.path.abspath("./Storage")
+    get_my_IP()
     ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
     ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
     ns_ds.start()
