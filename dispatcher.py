@@ -138,7 +138,7 @@ def DS_NS_connection(path, filename):
             server_control["{}{}".format(path, filename)] = [address]
         else:
             ips = server_control.get("{}{}".format(path, filename))
-            ips.append(address)
+            ips.append(address[0])
         print(server_control)
         ds_ns.close()
 
