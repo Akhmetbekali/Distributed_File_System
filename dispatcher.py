@@ -144,7 +144,10 @@ def client_server():
 
 def DS_NS_connection(path, filename):
     counter = 0
-    while counter < len(ds):
+    working_servers = 0
+    working_servers += [1 for x in ds_work if x]
+    print(working_servers)
+    while counter < working_servers:
         ds_ns = socket.socket()
         while True:
             try:  # moved this line here
