@@ -140,9 +140,10 @@ def DS_NS_connection(path, filename):
         info = pickle.loads(ds_ns.recv(1024))
         if path_map.get("{}{}".format(path, filename)) is None:
             consid_file(info, path, filename)
-            path_content = file_structure.get(path)
-            if path_content is None:
-                print("Error")
+        path_content = file_structure.get(path)
+        if path_content is None:
+            print("Error")
+        if filename not in path_content:
             path_content.append(filename)
         if server_control.get("{}{}".format(path, filename)) is None:
             server_control["{}{}".format(path, filename)] = [address[0]]
