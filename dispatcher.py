@@ -156,6 +156,7 @@ def DS_NS_connection(path, filename):
             ips = server_control.get("{}{}".format(path, filename))
             ips.append(address[0])
         print(server_control)
+        time.sleep(3)
         ds_ns.close()
         counter += 1
 
