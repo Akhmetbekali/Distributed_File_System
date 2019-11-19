@@ -211,7 +211,6 @@ def storage_is_server(port):
             msg = "Server started"
             conn.send(pickle.dumps(msg))
         elif data == "Upload":
-            print("Line 150")
             msg = "Ready to " + data
             conn.send(pickle.dumps(msg))
             handler = MyFTPHandler

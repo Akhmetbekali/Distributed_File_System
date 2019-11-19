@@ -153,30 +153,21 @@ def rmdir(conn):
         path = ""
         for i in range(len(path_list) - 1):
             path += "{}/".format(path_list[i])
-        print("Line153", name)
         remove_dir("{}{}/".format(current_folder, name))
 
         path_content = file_structure.get("{}{}".format(current_folder, path))
-        print(path_content)
         path_content.remove(deleted_path)
-        file_structure["{}{}/".format(current_folder, name)] = path_content
         msg = "Directory deleted"
-        print(file_structure)
         conn.send(pickle.dumps(msg))
     else:
         msg = "No such directory"
-        print(file_structure)
         conn.send(pickle.dumps(msg))
 
 
 def remove_dir(dir):
     path_content = file_structure.get(dir)
-    print("Line 169")
-    print(dir)
-    print(file_structure)
-    for elem in path_content:
+    for elem in reversed(path_content):
         path = "{}{}/".format(dir, elem)
-        print(path)
         if file_structure.get(path) is not None:
             print(elem + " is a directory")
             remove_dir(path)
@@ -190,7 +181,6 @@ def remove_dir(dir):
 def remove_file(name, path):
     path_content = file_structure.get(path)
     if name not in path_content:
-        print(name)
         msg = "No such file"
         return msg
     elif file_structure.get("{}{}/".format(path, name)) is not None:
@@ -200,7 +190,6 @@ def remove_file(name, path):
         msg = "Delete file"
         status, response = storage_server(msg, calc_hash("{}{}".format(path, name)))
         if status == "Success":
-            print("Line190")
             path_content.remove(name)
             file_structure[path] = path_content
             path_map.pop("{}{}".format(path, name))
@@ -228,7 +217,6 @@ def readdir(conn):
 
 def opendir(conn):
     conn.send(pickle.dumps("\nEnter the name of directory"))
-    print(file_structure)
     dir = pickle.loads(conn.recv(1024))
     global current_folder
     if dir == "/":
@@ -265,7 +253,7 @@ def mkfile(conn):
 def rmfile(conn):  # TODO in DS recreate file
     conn.send(pickle.dumps("\nEnter the name of file"))
     name = pickle.loads(conn.recv(1024))
-    msg = remove_file(conn, name, current_folder)
+    msg = remove_file(name, current_folder)
     conn.send(pickle.dumps(msg))
 
 
