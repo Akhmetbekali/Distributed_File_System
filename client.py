@@ -51,6 +51,7 @@ def client_nameserver():
                         destination = input()
                         client_socket.send(pickle.dumps(destination))
                         ans = pickle.loads(client_socket.recv(1024))
+                        print(ans)
                         if ans == "Enter the filename: ":
                             filename = input()
                             client_socket.send(pickle.dumps(filename))
