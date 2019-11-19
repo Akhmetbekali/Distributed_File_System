@@ -237,7 +237,8 @@ def remove_file(name, path):
                     response = "Error: no DS contain file"
                 else:
                     ips = server_control.get("{}{}".format(current_folder, name))
-                    ips.remove(ip)
+                    if ip in ips:
+                        ips.remove(ip)
             else:
                 msg = "Error: {}".format(response)
                 response = msg
