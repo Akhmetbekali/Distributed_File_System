@@ -228,6 +228,7 @@ def storage_is_server(port):
             file_info = create_file(path)
             conn.send(pickle.dumps(file_info))
         elif data == "Delete file":
+            print("Delete")
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
             file_info = delete_file(path)

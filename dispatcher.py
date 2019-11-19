@@ -224,7 +224,9 @@ def remove_file(name, path):
     else:
         msg = "Delete file"
         for ip in ds:
+            print(ip)
             status, response = storage_server(ip, msg, calc_hash("{}{}".format(current_folder, name)))
+            print(status)
             if status == "Success":
                 if name in path_content:
                     path_content.remove(name)
