@@ -3,6 +3,7 @@ import os
 import pickle
 import socket
 import shutil
+import time
 from threading import Thread
 from multiprocessing import Process
 
@@ -122,9 +123,15 @@ def client_server():
 
 
 def DS_NS_connection(path, filename):
-    ds_ns = socket.socket()
-    ds_ns.bind(('', ds_ns_port))
     while True:
+        ds_ns = socket.socket()
+        while True:
+            try:  # moved this line here
+                ds_ns.bind(('', ds_ns_port))
+                break
+            except socket.error:
+                print("Connection Failed, Retrying..")
+                time.sleep(1)
         ds_ns.listen(2)
         ds_ns, address = ds_ns.accept()
         print("Connection from: " + str(address))
