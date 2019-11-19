@@ -16,6 +16,7 @@ import constants        # if highlighted - still don't care, it works
 ds1_ip = constants.ds1_ip
 ds2_ip = constants.ds2_ip
 ds3_ip = constants.ds3_ip
+ds = [ds1_ip, ds2_ip, ds3_ip]
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
@@ -24,9 +25,12 @@ ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
 ds_ns_port = constants.ds_ns_port
 
+replication = False
+
 
 class MyFTPHandler(FTPHandler):
     def on_connect(self):
+        print("My IP: {}".format(self.masquerade_address))
         print("%s:%s connected" % (self.remote_ip, self.remote_port))
 
     def on_file_sent(self, file):
@@ -41,21 +45,17 @@ class MyFTPHandler(FTPHandler):
 
     def on_file_received(self, file):
         print("File received {}".format(file))
-
-        # self.server.close_when_done()
-        # file_info(file)
-        # file = hashlib.sha256(file.encode()).hexdigest()
-        rep1 = Thread(target=start_replication, args=(file, ds2_ip))
-        rep2 = Thread(target=start_replication, args=(file, ds3_ip))
+        if self.remote_ip not in ds:
+            for ip in ds:
+                if ip != self.masquerade_address:
+                    print("Replica to " + ip)
+                    new_rep = Thread(target=start_replication(file, ip))
+                    new_rep.start()
+                    new_rep.join()
         time.sleep(3)
-        rep3 = Thread(target=file_info_met, args=(file, ns_ip))
-        print("Trying by thread")
-        rep1.start()
-        rep2.start()
-        rep3.start()
-        rep1.join()
-        rep2.join()
-        rep3.join()
+        send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
+        send_file_info.start()
+        send_file_info.join()
 
     
 class NoRepFTPHandler(FTPHandler):
@@ -207,6 +207,8 @@ def storage_is_server(port):
             msg = "Server started"
             conn.send(pickle.dumps(msg))
         elif data == "Replication":
+            global replication
+            replication = True
             handler = NoRepFTPHandler
             start = Thread(target=start_ftp_server, args=(handler,))
             start.start()
