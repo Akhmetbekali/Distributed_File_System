@@ -9,9 +9,10 @@ from multiprocessing import Process
 
 import constants  # if highlighted - still don't care, it works
 
-ds1_ip = constants.ds1_ip
-ds2_ip = constants.ds2_ip
-ds3_ip = constants.ds3_ip
+# ds1_ip = constants.ds1_ip
+# ds2_ip = constants.ds2_ip
+# ds3_ip = constants.ds3_ip
+ds = [ds1_ip, ds2_ip, ds3_ip]
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
@@ -63,7 +64,7 @@ def client_server():
                 elif data == "Move file":
                     move_file(conn)
                 elif data == "Initialize":
-                    msg = start_storage(data, ds1_ip, ns_ds_port)
+                    msg = start_storage(data, ds[0], ns_ds_port)
                     conn.send(pickle.dumps(msg))
                 elif data == "Help":
                     conn.send(pickle.dumps(messages))
@@ -80,7 +81,7 @@ def client_server():
                     msg = "IP:"
                     conn.send(pickle.dumps(msg))
                     pickle.loads(conn.recv(1024))
-                    msg = "{}:{}".format(ds1_ip, ftp_port)
+                    msg = "{}:{}".format(ds[0], ftp_port)
                     conn.send(pickle.dumps(msg))
                     command = pickle.loads(conn.recv(1024))
                     conn.send(pickle.dumps(command))
@@ -214,15 +215,22 @@ def remove_file(name, path):
         return msg
     else:
         msg = "Delete file"
-        status, response = storage_server(msg, calc_hash("{}{}".format(path, name)))
-        if status == "Success":
-            path_content.remove(name)
-            file_structure[path] = path_content
-            path_map.pop("{}{}".format(path, name))
-            return "Success"
-        else:
-            msg = "Error: {}".format(response)
-            return msg
+        for ip in ds:
+            status, response = storage_server(ip, msg, calc_hash("{}{}".format(current_folder, name)))
+            if status == "Success":
+                if name in path_content:
+                    path_content.remove(name)
+                    file_structure[current_folder] = path_content
+                    path_map.pop("{}{}".format(path, name))
+                if server_control.get("{}{}".format(current_folder, name)) is None:
+                    return "Error: no DS contain file"
+                else:
+                    ips = server_control.get("{}{}".format(current_folder, name))
+                    ips.remove(ip)
+                return response
+            else:
+                msg = "Error: {}".format(response)
+                return msg
 
 
 def readdir(conn):
@@ -265,15 +273,22 @@ def mkfile(conn):
         conn.send(pickle.dumps(msg))
     else:
         msg = "Create file"
-        status, response = storage_server(msg, calc_hash("{}{}".format(current_folder, filename)))
-        if status == "Success":
-            path_content.append(filename)
-            file_structure[current_folder] = path_content
-            consid_file(response, current_folder, filename)
-            conn.send(pickle.dumps(response))
-        else:
-            msg = "Error: {}".format(response)
-            conn.send(pickle.dumps(msg))
+        for ip in ds:
+            status, response = storage_server(ip, msg, calc_hash("{}{}".format(current_folder, filename)))
+            if status == "Success":
+                if filename not in path_content:
+                    path_content.append(filename)
+                    file_structure[current_folder] = path_content
+                    consid_file(response, current_folder, filename)
+                if server_control.get("{}{}".format(current_folder, filename)) is None:
+                    server_control["{}{}".format(current_folder, filename)] = [ip]
+                else:
+                    ips = server_control.get("{}{}".format(current_folder, filename))
+                    ips.append(ip)
+                conn.send(pickle.dumps(response))
+            else:
+                msg = "Error: {}".format(response)
+                conn.send(pickle.dumps(msg))
 
 
 def rmfile(conn):  # TODO in DS recreate file
@@ -323,12 +338,25 @@ def copy_file(conn):
         msg = "File already exist"
         conn.send(pickle.dumps(msg))
         return
-    status, response = storage_server("Copy file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
-                                                                  calc_hash("{}{}".format(destination, filename))))
-    consid_file(response, destination, filename)
-    dest_content = file_structure[destination]
-    dest_content.append(filename)
-    file_structure[destination] = dest_content
+    msg = "Copy file"
+    for ip in ds:
+        status, response = storage_server(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
+                                          calc_hash("{}{}".format(destination, filename))))
+        if status == "Success":
+            consid_file(response, destination, filename)
+            if server_control.get("{}{}".format(current_folder, filename)) is None:
+                server_control["{}{}".format(current_folder, filename)] = [ip]
+            else:
+                ips = server_control.get("{}{}".format(current_folder, filename))
+                ips.append(ip)
+            conn.send(pickle.dumps(response))
+        else:
+            msg = "Error: {}".format(response)
+            conn.send(pickle.dumps(msg))
+        dest_content = file_structure[destination]
+        if filename not in dest_content:
+            dest_content.append(filename)
+            file_structure[destination] = dest_content
     msg = "File copied successfully."
     conn.send(pickle.dumps(msg))
 
@@ -336,7 +364,8 @@ def copy_file(conn):
 def consid_file(response, path, filename):  # TODO write file info after Uploading and replication
     file_info = response
     hashcode = calc_hash("{}{}".format(path, filename))
-    path_map["{}{}".format(path, filename)] = [hashcode, file_info]
+    if path_map.get("{}{}".format(path, filename)) is None:
+        path_map["{}{}".format(path, filename)] = [hashcode, file_info]
 
 
 def move_file(conn):
@@ -366,17 +395,29 @@ def move_file(conn):
         msg = "File already exists"
         conn.send(pickle.dumps(msg))
         return
-    status, response = storage_server("Move file", "{} {}".format(calc_hash("{}{}".format(source, filename)),
+    msg = "Move file"
+    for ip in ds:
+        status, response = storage_server(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                   calc_hash("{}{}".format(destination, filename))))
-    consid_file(response, destination, filename)
-    dest_content = file_structure[destination]
-    dest_content.append(filename)
-    file_structure[destination] = dest_content
-    source_content = file_structure[source]
-    source_content.remove(filename)
-    file_structure[source] = source_content
-    file = path_map.pop("{}{}".format(source, filename))
-    path_map["{}{}".format(destination, filename)] = file
+        if status == "Success":
+            consid_file(response, destination, filename)
+            if server_control.get("{}{}".format(current_folder, filename)) is None:
+                server_control["{}{}".format(current_folder, filename)] = [ip]
+            else:
+                ips = server_control.get("{}{}".format(current_folder, filename))
+                ips.append(ip)
+            conn.send(pickle.dumps(response))
+        else:
+            msg = "Error: {}".format(response)
+            conn.send(pickle.dumps(msg))
+        dest_content = file_structure[destination]
+        if filename not in dest_content:
+            dest_content.append(filename)
+            file_structure[destination] = dest_content
+        source_content = file_structure[source]
+        if filename in source_content:
+            source_content.remove(filename)
+            file_structure[source] = source_content
     msg = "File moved successfully."
     conn.send(pickle.dumps(msg))
 
@@ -396,8 +437,8 @@ def start_storage(msg, ip, port):
         return "Error"
 
 
-def storage_server(message, path):
-    host = ds1_ip
+def storage_server(ip, message, path):
+    host = ip
     port = ns_ds_port
     client_socket = socket.socket()
     client_socket.connect((host, port))

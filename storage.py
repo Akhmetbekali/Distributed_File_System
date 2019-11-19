@@ -198,11 +198,12 @@ def storage_is_server(port):
         if not data:
             conn.close()
         if data == 'Initialize':
-            handler = MyFTPHandler
-            clear_ds2 = Thread(target=start_storage, args=("Replication", ds2_ip, ds_ds_tcp_port))
-            clear_ds2.start()
-            clear_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
-            clear_ds3.start()
+            for ip in ds:
+                if ip != get_my_IP():
+                    init_ds = Thread(target=start_storage, args=("Replication", ip, ds_ds_tcp_port))
+                    if init_ds.isAlive() is False:
+                        init_ds.start()
+                    init_ds.join()
             start = Thread(target=start_ftp_server, args=())
             start.start()
             print("Server started")
@@ -247,10 +248,12 @@ def storage_is_server(port):
             conn.send(pickle.dumps(file_info))
         elif data == "Clear":
             os.system("sudo rm -r Storage/* -f")
-            clear_ds2 = Thread(target=start_storage, args=("Clear2", ds2_ip, ds_ds_tcp_port))
-            clear_ds2.start()
-            clear_ds3 = Thread(target=start_storage, args=("Clear2", ds3_ip, ds_ds_tcp_port))
-            clear_ds3.start()
+            for ip in ds:
+                if ip != get_my_IP():
+                    clear_ds = Thread(target=start_storage, args=("Clear2", ip, ds_ds_tcp_port))
+                    if clear_ds.isAlive() is False:
+                        clear_ds.start()
+                    clear_ds.join()
             msg = "Clear"
             conn.send(pickle.dumps(msg))
         elif data == "Clear2":
