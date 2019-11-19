@@ -484,16 +484,18 @@ def storage_server(ip, message, path):
 
 
 def check_servers():
-    for ip in ds:
-        hostname = ip
-        response = os.system("ping -c 1 " + hostname)
+    while True:
+        for ip in ds:
+            hostname = ip
+            response = os.system("ping -c 1 " + hostname)
 
-        # and then check the response...
-        if response == 0:
-            print(hostname, 'is up!')
-        else:
-            print(hostname, 'is down!')
-            ds.remove(ip)
+            # and then check the response...
+            if response == 0:
+                print(hostname, 'is up!')
+            else:
+                print(hostname, 'is down!')
+                ds.remove(ip)
+        time.sleep(10)
 
 
 if __name__ == '__main__':
@@ -501,6 +503,8 @@ if __name__ == '__main__':
                 "Create file", "Delete file", "File info", "Copy file", "Move file",
                 "Open directory", "Read directory", "Make directory", "Delete directory",
                 "Connect", "Clear", "Help"]
+    checker = Thread(target=check_servers, daemon=True)
+    checker.start()
     file_structure.update({'/': []})
     print(file_structure)
     client_server()
