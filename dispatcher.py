@@ -84,7 +84,9 @@ def client_server():
                     directory = pickle.loads(conn.recv(1024))
                     print(directory)
 
-                    if file_structure.get("/{}/".format(directory)) is not None:
+                    if directory != "/":
+                        directory = "/{}/".format(directory)
+                    if file_structure.get(directory) is not None:
                         msg = "Enter the filename: "
                         conn.send(pickle.dumps(msg))
                         filename = pickle.loads(conn.recv(1024))
