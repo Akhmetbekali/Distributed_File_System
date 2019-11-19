@@ -59,8 +59,15 @@ class MyFTPHandler(FTPHandler):
 
 def file_info_met(file, ip):
     print("Creating connection DS -> NS")
-    ds_ns = socket.socket()
-    ds_ns.connect((ip, ds_ns_port))
+    while True:
+        try:  # moved this line here
+            ds_ns = socket.socket()
+            ds_ns.connect((ip, ds_ns_port))  # no longer throws error
+            break
+        except socket.error:
+            print
+            "Connection Failed, Retrying.."
+            time.sleep(1)
     message = os.stat(file)
     ds_ns.send(pickle.dumps(message))
     ds_ns.close()
