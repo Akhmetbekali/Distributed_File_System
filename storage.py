@@ -30,7 +30,6 @@ replication = False
 
 class MyFTPHandler(FTPHandler):
     def on_connect(self):
-        print("My IP: {}".format(get_my_IP()))
         print("%s:%s connected" % (self.remote_ip, self.remote_port))
 
     def on_file_sent(self, file):
@@ -47,15 +46,15 @@ class MyFTPHandler(FTPHandler):
         print("File received {}".format(file))
         if self.remote_ip not in ds:
             for ip in ds:
-                if ip != self.masquerade_address:
+                if ip != get_my_IP():
                     print("Replica to " + ip)
                     new_rep = Thread(target=start_replication(file, ip))
                     new_rep.start()
                     new_rep.join()
-        time.sleep(3)
-        send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
-        send_file_info.start()
-        send_file_info.join()
+            time.sleep(3)
+            send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
+            send_file_info.start()
+            send_file_info.join()
 
     
 class NoRepFTPHandler(FTPHandler):
@@ -90,10 +89,10 @@ def get_my_IP():
     try:
         host_name = socket.gethostname()
         host_ip = socket.gethostbyname(host_name)
-        print("Hostname :  ", host_name)
-        print("IP : ", host_ip)
+        return host_ip
     except:
         print("Unable to get Hostname and IP")
+        return 0
 
 
 def start_ftp_server(handler):
@@ -220,7 +219,7 @@ def storage_is_server(port):
         elif data == "Replication":
             global replication
             replication = True
-            handler = NoRepFTPHandler
+            handler = MyFTPHandler
             start = Thread(target=start_ftp_server, args=(handler,))
             start.start()
             msg = "Server started"
@@ -276,7 +275,6 @@ def storage_is_server(port):
 
 if __name__ == '__main__':
     homedir = os.path.abspath("./Storage")
-    get_my_IP()
     ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
     ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
     ns_ds.start()
