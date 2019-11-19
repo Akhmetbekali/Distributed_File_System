@@ -234,14 +234,14 @@ def remove_file(name, path):
                     path_map.pop("{}{}".format(path, name))
                 print(server_control)
                 if server_control.get("{}{}".format(current_folder, name)) is None:
-                    return "Error: no DS contain file"
+                    response = "Error: no DS contain file"
                 else:
                     ips = server_control.get("{}{}".format(current_folder, name))
                     ips.remove(ip)
-                return response
             else:
                 msg = "Error: {}".format(response)
-                return msg
+                response = msg
+        return response
 
 
 def readdir(conn):
