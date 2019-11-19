@@ -145,6 +145,7 @@ def DS_NS_connection(path, filename):
             print("Error")
         if filename not in path_content:
             path_content.append(filename)
+            file_structure[path] = path_content
         if server_control.get("{}{}".format(path, filename)) is None:
             server_control["{}{}".format(path, filename)] = [address[0]]
         else:
