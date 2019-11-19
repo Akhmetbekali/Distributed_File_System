@@ -106,7 +106,7 @@ def client_server():
                                 print("Waiting for connection from DS")
                                 status = pickle.loads(conn.recv(1024))
                                 print(status)
-                                path_content = file_structure.get(path)
+                                path_content = file_structure.get(directory)
                                 print(path_content)
                                 if path_content is None:
                                     print("Error")
