@@ -91,7 +91,7 @@ def client_server():
                         conn.send(pickle.dumps(msg))
                         filename = pickle.loads(conn.recv(1024))
                         print(filename)
-                        path = "{}/{}".format(directory, filename)
+                        path = "{}{}".format(directory, filename)
                         hashed_path = calc_hash(path)
                         conn.send(pickle.dumps(hashed_path))
                         print("Waiting for connection from DS")
