@@ -121,26 +121,26 @@ def client_server():
 
 
 def DS_NS_connection(path, filename):
-    print("DSNS in server")
     ds_ns = socket.socket()
     ds_ns.bind(('', ds_ns_port))
-    ds_ns.listen(2)
-    ds_ns, address = ds_ns.accept()
-    print("Connection from: " + str(address))
-    info = pickle.loads(ds_ns.recv(1024))
-    if path_map.get("{}{}".format(path, filename)) is None:
-        consid_file(info, path, filename)
-        path_content = file_structure.get(path)
-        if path_content is None:
-            return "Error"
-        path_content.append(filename)
-    if server_control.get("{}{}".format(path, filename)) is None:
-        server_control["{}{}".format(path, filename)] = [address]
-    else:
-        ips = server_control.get("{}{}".format(path, filename))
-        ips.append(address)
-    print(server_control)
-    ds_ns.close()
+    while True:
+        ds_ns.listen(2)
+        ds_ns, address = ds_ns.accept()
+        print("Connection from: " + str(address))
+        info = pickle.loads(ds_ns.recv(1024))
+        if path_map.get("{}{}".format(path, filename)) is None:
+            consid_file(info, path, filename)
+            path_content = file_structure.get(path)
+            if path_content is None:
+                print("Error")
+            path_content.append(filename)
+        if server_control.get("{}{}".format(path, filename)) is None:
+            server_control["{}{}".format(path, filename)] = [address]
+        else:
+            ips = server_control.get("{}{}".format(path, filename))
+            ips.append(address)
+        print(server_control)
+        ds_ns.close()
 
 
 def mkdir(conn):

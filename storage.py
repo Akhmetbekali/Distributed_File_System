@@ -65,9 +65,9 @@ def file_info_met(file, ip):
             ds_ns.connect((ip, ds_ns_port))  # no longer throws error
             break
         except socket.error:
-            print
-            "Connection Failed, Retrying.."
+            print("Connection Failed, Retrying..")
             time.sleep(1)
+    print("Connected to " + ip)
     message = os.stat(file)
     ds_ns.send(pickle.dumps(message))
     ds_ns.close()
