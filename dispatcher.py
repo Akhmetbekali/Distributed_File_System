@@ -281,7 +281,9 @@ def mkfile(conn):
         conn.send(pickle.dumps(msg))
     else:
         msg = "Create file"
+        counter = 0
         for ip in ds:
+            counter += 1
             status, response = storage_server(ip, msg, calc_hash("{}{}".format(current_folder, filename)))
             if status == "Success":
                 if filename not in path_content:
@@ -293,10 +295,12 @@ def mkfile(conn):
                 else:
                     ips = server_control.get("{}{}".format(current_folder, filename))
                     ips.append(ip)
-                conn.send(pickle.dumps(response))
+                if counter < 2:
+                    conn.send(pickle.dumps(response))
             else:
                 msg = "Error: {}".format(response)
-                conn.send(pickle.dumps(msg))
+                if counter < 2:
+                    conn.send(pickle.dumps(msg))
 
 
 def rmfile(conn):  # TODO in DS recreate file
@@ -347,7 +351,9 @@ def copy_file(conn):
         conn.send(pickle.dumps(msg))
         return
     msg = "Copy file"
+    counter = 0
     for ip in ds:
+        counter += 1
         status, response = storage_server(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                           calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
@@ -357,10 +363,12 @@ def copy_file(conn):
             else:
                 ips = server_control.get("{}{}".format(current_folder, filename))
                 ips.append(ip)
-            conn.send(pickle.dumps(response))
+            if counter < 2:
+                conn.send(pickle.dumps(response))
         else:
             msg = "Error: {}".format(response)
-            conn.send(pickle.dumps(msg))
+            if counter < 2:
+                conn.send(pickle.dumps(msg))
         dest_content = file_structure[destination]
         if filename not in dest_content:
             dest_content.append(filename)
@@ -404,7 +412,9 @@ def move_file(conn):
         conn.send(pickle.dumps(msg))
         return
     msg = "Move file"
+    counter = 0
     for ip in ds:
+        counter += 1
         status, response = storage_server(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                   calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
@@ -414,10 +424,12 @@ def move_file(conn):
             else:
                 ips = server_control.get("{}{}".format(current_folder, filename))
                 ips.append(ip)
-            conn.send(pickle.dumps(response))
+            if counter < 2:
+                conn.send(pickle.dumps(response))
         else:
             msg = "Error: {}".format(response)
-            conn.send(pickle.dumps(msg))
+            if counter < 2:
+                conn.send(pickle.dumps(msg))
         dest_content = file_structure[destination]
         if filename not in dest_content:
             dest_content.append(filename)
