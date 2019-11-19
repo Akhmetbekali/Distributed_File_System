@@ -106,8 +106,17 @@ def client_server():
                                 print("Waiting for connection from DS")
                                 status = pickle.loads(conn.recv(1024))
                                 print(status)
+                                path_content = file_structure.get(path)
+                                print(path_content)
+                                if path_content is None:
+                                    print("Error")
+                                if filename not in path_content:
+                                    print("Adding new file")
+                                    path_content.append(filename)
+                                    file_structure[path] = path_content
+                                    print(file_structure)
                                 # if status == "Client uploaded":
-                                ds_ns = Process(target=DS_NS_connection, args=(directory, filename))
+                                ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
                                 ds_ns.start()
                                 ds_ns.join()
                         if command == "Download":
@@ -141,22 +150,12 @@ def DS_NS_connection(path, filename):
         if path_map.get("{}{}".format(path, filename)) is None:
             consid_file(info, path, filename)
             print(path_map)
-        path_content = file_structure.get(path)
-        print(path_content)
-        if path_content is None:
-            print("Error")
-        if filename not in path_content:
-            print("Adding new file")
-            path_content.append(filename)
-            file_structure[path] = path_content
-            print(file_structure)
         if server_control.get("{}{}".format(path, filename)) is None:
             server_control["{}{}".format(path, filename)] = [address[0]]
         else:
             ips = server_control.get("{}{}".format(path, filename))
             ips.append(address[0])
         print(server_control)
-        time.sleep(3)
         ds_ns.close()
         counter += 1
 
