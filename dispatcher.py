@@ -97,10 +97,10 @@ def client_server():
                         print("Waiting for connection from DS")
                         status = pickle.loads(conn.recv(1024))
                         print(status)
-                        if status == "Client uploaded":
-                            ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
-                            ds_ns.start()
-                            ds_ns.join()
+                        # if status == "Client uploaded":
+                        ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
+                        ds_ns.start()
+                        ds_ns.join()
 
                     else:
                         conn.send(pickle.dumps("No such directory"))
