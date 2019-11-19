@@ -143,7 +143,7 @@ def DS_NS_connection(path, filename):
                 print("Error")
             path_content.append(filename)
         if server_control.get("{}{}".format(path, filename)) is None:
-            server_control["{}{}".format(path, filename)] = [address]
+            server_control["{}{}".format(path, filename)] = [address[0]]
         else:
             ips = server_control.get("{}{}".format(path, filename))
             ips.append(address[0])
