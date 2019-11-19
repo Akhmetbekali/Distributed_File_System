@@ -54,11 +54,17 @@ def client_nameserver():
                         print(ans)
                         if ans == "Enter the filename: ":
                             filename = input()
-                            client_socket.send(pickle.dumps(filename))
-                            print(folder + filename)
-                            hashed_path = pickle.loads(client_socket.recv(1024))
-                            uploadfile(ip, port, hashed_path, filename)
-                            client_socket.send(pickle.dumps("Client uploaded"))
+                            if folder != "/":
+                                path = folder + '/' + filename
+                            else:
+                                path = filename
+                            print(path)
+                            if os.path.isfile(path):
+                                print("File confirmed")
+                                client_socket.send(pickle.dumps(filename))
+                                hashed_path = pickle.loads(client_socket.recv(1024))
+                                uploadfile(ip, port, hashed_path, path)
+                                client_socket.send(pickle.dumps("Client uploaded"))
                         else:
                             print(ans)
                             print(folder)
