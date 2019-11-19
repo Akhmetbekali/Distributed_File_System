@@ -121,9 +121,9 @@ def client_server():
 
 
 def DS_NS_connection(path, filename):
-    ds_ns = socket.socket()
-    ds_ns.bind(('', ds_ns_port))
     while True:
+        ds_ns = socket.socket()
+        ds_ns.bind(('', ds_ns_port))
         ds_ns.listen(2)
         ds_ns, address = ds_ns.accept()
         print("Connection from: " + str(address))
