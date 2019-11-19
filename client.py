@@ -46,19 +46,23 @@ def client_nameserver():
                 if confirmation == "Upload":
                     print("Enter uploading path ( '/' is current): ")
                     folder = input()
-                    client_socket.send(pickle.dumps(folder))
-
-                    ans = pickle.loads(client_socket.recv(1024))
-                    print(ans)
-                    if ans == "Enter the filename: ":
-                        filename = input()
-                        client_socket.send(pickle.dumps(filename))
-                        print(folder + filename)
-                        hashed_path = pickle.loads(client_socket.recv(1024))
-                        uploadfile(ip, port, hashed_path, filename)
-                        client_socket.send(pickle.dumps("Client uploaded"))
+                    if os.path.isdir(folder):
+                        print("Where to save in Storage?")
+                        destination = input()
+                        client_socket.send(pickle.dumps(destination))
+                        ans = pickle.loads(client_socket.recv(1024))
+                        if ans == "Enter the filename: ":
+                            filename = input()
+                            client_socket.send(pickle.dumps(filename))
+                            print(folder + filename)
+                            hashed_path = pickle.loads(client_socket.recv(1024))
+                            uploadfile(ip, port, hashed_path, filename)
+                            client_socket.send(pickle.dumps("Client uploaded"))
+                        else:
+                            print(ans)
+                            print(folder)
                     else:
-                        print(ans)
+                        print("No such directory")
                         print(folder)
 
         message = input(" -> ")
