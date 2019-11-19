@@ -112,7 +112,7 @@ def start_replication(file, ip):
     port = ftp_port
     try:
         ftp.connect(host, port)
-    except
+    except:
         return
     ftp.login(user='user', passwd='12345')
     uploadfile(ftp, file)
