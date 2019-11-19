@@ -71,6 +71,18 @@ def client_nameserver():
                     else:
                         print("No such directory")
                         print(folder)
+                if confirmation == "Download":
+                    print("Enter downloading path ( '/' is current): ")
+                    folder = input()
+                    client_socket.send(pickle.dumps(folder))
+                    ans = pickle.loads(client_socket.recv(1024))
+                    print(ans)
+                    file = input()
+                    client_socket.send(pickle.dumps(file))
+                    hashed_path = pickle.loads(client_socket.recv(1024))
+                    print(file)
+                    downloadfile(ip, port, hashed_path, folder, file)
+                    client_socket.send(pickle.dumps("Client downloading"))
 
         message = input(" -> ")
 
@@ -88,16 +100,14 @@ def uploadfile(host, port, hashed_path, filename):  # Откуда запуск�
     ftp.close()
 
 
-def downloadfile(ftp):  # Откуда запускаешь, туда и сохраняет
-    print("Enter downloading path ( '/' is current): ")
-    path = input()
-    ftp.cwd(path)
-    print("Current directory: " + ftp.pwd())
-    print("Enter the filename: ")
-    filename = input()
+def downloadfile(host, port, hashed_path, folder, filename):  # Откуда запускаешь, туда и сохраняет
+    ftp = FTP()
+    ftp.connect(host, port)
+    ftp.login("user", "12345")
+    ftp.cwd(folder)
     localfile = open(filename, 'wb')
-    ftp.retrbinary('RETR ' + filename, localfile.write, 1024)
-    ftp.pwd()
+    ftp.retrbinary('RETR ' + hashed_path, localfile.write, 1024)
+    print(ftp.pwd())
     ftp.close()
     localfile.close()
 

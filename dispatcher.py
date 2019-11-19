@@ -87,25 +87,28 @@ def client_server():
                     if directory != "/":
                         directory = "/{}/".format(directory)
                     if file_structure.get(directory) is not None:
-                        print("I'm in")
                         msg = "Enter the filename: "
                         conn.send(pickle.dumps(msg))
                         filename = pickle.loads(conn.recv(1024))
                         print(filename)
 
                         path = "{}{}".format(directory, filename)
-                        if path_map.get(path) is not None:
-                            conn.send(pickle.dumps("File already exists"))
-                        else:
+                        if command == "Upload":
+                            if path_map.get(path) is not None:
+                                conn.send(pickle.dumps("File already exists"))
+                            else:
+                                hashed_path = calc_hash(path)
+                                conn.send(pickle.dumps(hashed_path))
+                                print("Waiting for connection from DS")
+                                status = pickle.loads(conn.recv(1024))
+                                print(status)
+                                # if status == "Client uploaded":
+                                ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
+                                ds_ns.start()
+                                ds_ns.join()
+                        if command == "Download":
                             hashed_path = calc_hash(path)
                             conn.send(pickle.dumps(hashed_path))
-                            print("Waiting for connection from DS")
-                            status = pickle.loads(conn.recv(1024))
-                            print(status)
-                            # if status == "Client uploaded":
-                            ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
-                            ds_ns.start()
-                            ds_ns.join()
                     else:
                         conn.send(pickle.dumps("No such directory"))
                         print(directory)
