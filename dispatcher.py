@@ -124,7 +124,8 @@ def client_server():
 
 
 def DS_NS_connection(path, filename):
-    while True:
+    counter = 0
+    while counter < len(ds):
         ds_ns = socket.socket()
         while True:
             try:  # moved this line here
@@ -150,6 +151,7 @@ def DS_NS_connection(path, filename):
             ips.append(address[0])
         print(server_control)
         ds_ns.close()
+        counter += 1
 
 
 def mkdir(conn):
