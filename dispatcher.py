@@ -363,8 +363,8 @@ def copy_file(conn):
             else:
                 ips = server_control.get("{}{}".format(current_folder, filename))
                 ips.append(ip)
-            if counter < 2:
-                conn.send(pickle.dumps(response))
+            # if counter < 2:
+            #     conn.send(pickle.dumps(response))
         else:
             msg = "Error: {}".format(response)
             if counter < 2:
@@ -424,8 +424,8 @@ def move_file(conn):
             else:
                 ips = server_control.get("{}{}".format(current_folder, filename))
                 ips.append(ip)
-            if counter < 2:
-                conn.send(pickle.dumps(response))
+            # if counter < 2:
+            #     conn.send(pickle.dumps(response))
         else:
             msg = "Error: {}".format(response)
             if counter < 2:
