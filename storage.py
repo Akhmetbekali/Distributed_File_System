@@ -52,9 +52,9 @@ class MyFTPHandler(FTPHandler):
                     new_rep.start()
                     new_rep.join()
             time.sleep(3)
-            send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
-            send_file_info.start()
-            send_file_info.join()
+        send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
+        send_file_info.start()
+        send_file_info.join()
 
 
 def file_info_met(file, ip):

@@ -21,7 +21,8 @@ ds_ns_port = constants.ds_ns_port
 file_structure = dict()  # format - path : list of directories and files inside
 current_folder = "/"  # string with the path of current folder
 servers = []  # list of Data Servers, format of server: [ip: str, free space: float]
-path_map = dict()  # format - path/filename : [hashcode, file info, availability]
+path_map = dict()  # format - path/filename : [hashcode, file info]
+server_control = dict()     # format - path/filename : [IPs]
 
 
 def client_server():
@@ -127,12 +128,16 @@ def DS_NS_connection(path, filename):
     ds_ns, address = ds_ns.accept()
     print("Connection from: " + str(address))
     info = pickle.loads(ds_ns.recv(1024))
+    ips = server_control.get("{}{}".format(path, filename))
+    ips.append(address)
+    print(server_control)
     ds_ns.close()
-    consid_file(info, path, filename)
-    path_content = file_structure.get(path)
-    if path_content is None:
-        return "Error"
-    path_content.append(filename)
+    if path_map.get("{}{}".format(path, filename)) is None:
+        consid_file(info, path, filename)
+        path_content = file_structure.get(path)
+        if path_content is None:
+            return "Error"
+        path_content.append(filename)
 
 
 def mkdir(conn):
@@ -320,7 +325,7 @@ def copy_file(conn):
 def consid_file(response, path, filename):  # TODO write file info after Uploading and replication
     file_info = response
     hashcode = calc_hash("{}{}".format(path, filename))
-    path_map["{}{}".format(path, filename)] = [hashcode, file_info, [True] * 3]
+    path_map["{}{}".format(path, filename)] = [hashcode, file_info]
 
 
 def move_file(conn):
