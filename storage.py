@@ -56,25 +56,6 @@ class MyFTPHandler(FTPHandler):
             send_file_info.start()
             send_file_info.join()
 
-    
-class NoRepFTPHandler(FTPHandler):
-    def on_connect(self):
-        print("%s:%s connected" % (self.remote_ip, self.remote_port))
-
-    def on_file_sent(self, file):
-        # do something when a file has been sent
-        print("File sent {}".format(file))
-
-    def on_disconnect(self):
-        print("%s:%s disconnected" % (self.remote_ip, self.remote_port))
-
-    def on_login(self, username):
-        print("Login {}".format(username))
-
-    def on_file_received(self, file):
-        print("File replicated {}".format(file))
-        # self.server.close_when_done()
-
 
 def file_info_met(file, ip):
     print("Creating connection DS -> NS")
@@ -95,13 +76,13 @@ def get_my_IP():
         return 0
 
 
-def start_ftp_server(handler):
+def start_ftp_server():
     if not os.path.isdir(homedir):
         os.mkdir(homedir)
     if not os.path.isfile("{}/test.txt".format(homedir)):
         f = open('{}/test.txt'.format(homedir), 'tw', encoding='utf-8')
         f.close()
-
+    handler = MyFTPHandler
     authorizer = DummyAuthorizer()
     authorizer.add_user('user', '12345', homedir=homedir, perm='elradfmwMT')
     handler.authorizer = authorizer
@@ -211,7 +192,7 @@ def storage_is_server(port):
             clear_ds2.start()
             clear_ds3 = Thread(target=start_storage, args=("Replication", ds3_ip, ds_ds_tcp_port))
             clear_ds3.start()
-            start = Thread(target=start_ftp_server, args=(handler,))
+            start = Thread(target=start_ftp_server, args=())
             start.start()
             print("Server started")
             msg = "Server started"
@@ -219,18 +200,16 @@ def storage_is_server(port):
         elif data == "Replication":
             global replication
             replication = True
-            handler = MyFTPHandler
-            start = Thread(target=start_ftp_server, args=(handler,))
+            start = Thread(target=start_ftp_server, args=())
             start.start()
             msg = "Server started"
             conn.send(pickle.dumps(msg))
         elif data == "Upload":
             msg = "Ready to " + data
             conn.send(pickle.dumps(msg))
-            handler = MyFTPHandler
-            start_ftp_server(handler)
+            start_ftp_server()
             pickle.loads(conn.recv(1024))
-            conn.send(pickle.dumps(handler))
+            conn.send(pickle.dumps("OK"))
         elif data == "Create file":
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
