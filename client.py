@@ -41,7 +41,9 @@ def client_nameserver():
                 # print(ip, port)
                 print("Do you want to upload or download file?")
                 ans = input()
-                if ans == "Upload":
+                client_socket.send(pickle.dumps(ans))
+                confirmation = pickle.loads(client_socket.recv(1024))
+                if confirmation == "Upload":
                     print("Enter uploading path ( '/' is current): ")
                     folder = input()
                     client_socket.send(pickle.dumps(folder))
