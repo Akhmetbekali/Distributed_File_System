@@ -230,6 +230,7 @@ def remove_file(name, path):
                     path_content.remove(name)
                     file_structure[current_folder] = path_content
                     path_map.pop("{}{}".format(path, name))
+                print(server_control)
                 if server_control.get("{}{}".format(current_folder, name)) is None:
                     return "Error: no DS contain file"
                 else:
