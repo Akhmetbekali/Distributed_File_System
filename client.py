@@ -54,7 +54,10 @@ def client_nameserver():
                         print(ans)
                         if ans == "Enter the filename: ":
                             filename = input()
-                            path = folder + '/' + filename
+                            if folder != "/":
+                                path = folder + '/' + filename
+                            else:
+                                path = filename
                             print(path)
                             if os.path.isfile(path):
                                 print("File confirmed")
