@@ -111,7 +111,6 @@ def downloadfile(host, port, hashed_path, folder, filename, save):  # Откуд
     save_path = save + '/' + filename
     localfile = open(save_path, 'wb')
     ftp.retrbinary('RETR ' + hashed_path, localfile.write, 1024)
-    print(ftp.pwd())
     ftp.close()
     localfile.close()
 
