@@ -49,7 +49,8 @@ class MyFTPHandler(FTPHandler):
                 if ip != get_my_IP():
                     print("Replica to " + ip)
                     new_rep = Thread(target=start_replication(file, ip))
-                    new_rep.start()
+                    if new_rep.isAlive() is False:
+                        new_rep.start()
                     new_rep.join()
                     time.sleep(2)
         file_info_met(file, ns_ip)
