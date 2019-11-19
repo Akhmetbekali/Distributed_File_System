@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import shutil
+import time
 from threading import Thread
 
 from pyftpdlib.authorizers import DummyAuthorizer
@@ -46,15 +47,16 @@ class MyFTPHandler(FTPHandler):
         # file = hashlib.sha256(file.encode()).hexdigest()
         rep1 = Thread(target=start_replication, args=(file, ds2_ip))
         rep2 = Thread(target=start_replication, args=(file, ds3_ip))
+        time.sleep(3)
         rep3 = Thread(target=file_info_met, args=(file, ns_ip))
         print("Trying by thread")
-        rep3.start()
         rep1.start()
         rep2.start()
-        rep3.join()
+        rep3.start()
         rep1.join()
         rep2.join()
-        
+        rep3.join()
+
     
 class NoRepFTPHandler(FTPHandler):
     def on_connect(self):
