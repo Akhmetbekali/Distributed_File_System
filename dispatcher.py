@@ -41,6 +41,7 @@ def client_server():
 
         while True:
             data = conn.recv(1024)
+            print(ds)
             if not data:
                 break
             data = pickle.loads(data)
