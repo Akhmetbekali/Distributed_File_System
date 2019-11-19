@@ -359,10 +359,10 @@ def copy_file(conn):
                                           calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(response, destination, filename)
-            if server_control.get("{}{}".format(current_folder, filename)) is None:
-                server_control["{}{}".format(current_folder, filename)] = [ip]
+            if server_control.get("{}{}".format(destination, filename)) is None:
+                server_control["{}{}".format(destination, filename)] = [ip]
             else:
-                ips = server_control.get("{}{}".format(current_folder, filename))
+                ips = server_control.get("{}{}".format(destination, filename))
                 ips.append(ip)
             # if counter < 2:
             #     conn.send(pickle.dumps(response))
@@ -420,10 +420,10 @@ def move_file(conn):
                                                                   calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(response, destination, filename)
-            if server_control.get("{}{}".format(current_folder, filename)) is None:
-                server_control["{}{}".format(current_folder, filename)] = [ip]
+            if server_control.get("{}{}".format(destination, filename)) is None:
+                server_control["{}{}".format(destination, filename)] = [ip]
             else:
-                ips = server_control.get("{}{}".format(current_folder, filename))
+                ips = server_control.get("{}{}".format(destination, filename))
                 ips.append(ip)
             # if counter < 2:
             #     conn.send(pickle.dumps(response))
