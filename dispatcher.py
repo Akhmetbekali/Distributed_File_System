@@ -113,7 +113,7 @@ def client_server():
                                 if filename not in path_content:
                                     print("Adding new file")
                                     path_content.append(filename)
-                                    file_structure[path] = path_content
+                                    file_structure[directory] = path_content
                                     print(file_structure)
                                 # if status == "Client uploaded":
                                 ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
