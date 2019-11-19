@@ -197,6 +197,9 @@ def storage_is_server(port):
 
         if not data:
             conn.close()
+        if data == "Check":
+            conn.send(pickle.dumps("Check"))
+
         if data == 'Initialize':
             for ip in ds:
                 if ip != get_my_IP():

@@ -465,7 +465,10 @@ def storage_server(ip, message, path):
     host = ip
     port = ns_ds_port
     client_socket = socket.socket()
-    client_socket.connect((host, port))
+    try:
+        client_socket.connect((host, port))
+    except:
+        return "Fail"
 
     client_socket.send(pickle.dumps(message))
 
@@ -477,6 +480,8 @@ def storage_server(ip, message, path):
         return "Success", response
     elif data == "Clear":
         return data
+    elif data == "Check":
+        return data
     else:
         print("Error")
         client_socket.close()
@@ -487,10 +492,10 @@ def check_servers():
     while True:
         for ip in ds:
             hostname = ip
-            response = os.system("ping -c 1 " + hostname)
+            response = storage_server(ip, "Check", "")
 
             # and then check the response...
-            if response == 0:
+            if response == "Check":
                 print(hostname, 'is up!')
             else:
                 print(hostname, 'is down!')
