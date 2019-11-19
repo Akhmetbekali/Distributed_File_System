@@ -140,7 +140,7 @@ def DS_NS_connection(path, filename):
             ips = server_control.get("{}{}".format(path, filename))
             ips.append(address[0])
         print(server_control)
-        ds_ns.close()
+        # ds_ns.close()
 
 
 def mkdir(conn):

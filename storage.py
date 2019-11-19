@@ -51,7 +51,7 @@ class MyFTPHandler(FTPHandler):
                     new_rep = Thread(target=start_replication(file, ip))
                     new_rep.start()
                     new_rep.join()
-            time.sleep(3)
+                    time.sleep(2)
         send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
         send_file_info.start()
         send_file_info.join()
