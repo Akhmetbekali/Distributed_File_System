@@ -124,7 +124,7 @@ def DS_NS_connection(path, filename):
     ds_ns = socket.socket()
     ds_ns.bind(('', ds_ns_port))
     while True:
-        ds_ns.listen()
+        ds_ns.listen(2)
         ds_ns, address = ds_ns.accept()
         print("Connection from: " + str(address))
         info = pickle.loads(ds_ns.recv(1024))
@@ -140,7 +140,7 @@ def DS_NS_connection(path, filename):
             ips = server_control.get("{}{}".format(path, filename))
             ips.append(address[0])
         print(server_control)
-        # ds_ns.close()
+        ds_ns.close()
 
 
 def mkdir(conn):

@@ -71,6 +71,7 @@ def file_info_met(file, ip):
     message = os.stat(file)
     ds_ns.send(pickle.dumps(message))
     ds_ns.close()
+    print("Disconnected from " + ip)
 
 
 def get_my_IP():
