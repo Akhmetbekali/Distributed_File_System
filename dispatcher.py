@@ -87,6 +87,7 @@ def client_server():
                     if directory != "/":
                         directory = "/{}/".format(directory)
                     if file_structure.get(directory) is not None:
+                        print("I'm in")
                         msg = "Enter the filename: "
                         conn.send(pickle.dumps(msg))
                         filename = pickle.loads(conn.recv(1024))
@@ -105,7 +106,6 @@ def client_server():
                             ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
                             ds_ns.start()
                             ds_ns.join()
-
                     else:
                         conn.send(pickle.dumps("No such directory"))
                         print(directory)
