@@ -72,18 +72,21 @@ def client_nameserver():
                         print("No such directory")
                         print(folder)
                 if confirmation == "Download":
-                    print("Enter downloading path ( '/' is current): ")
+                    print("Enter from where to download path ( '/' is current): ")
                     folder = input()
-                    client_socket.send(pickle.dumps(folder))
-                    ans = pickle.loads(client_socket.recv(1024))
-                    print(ans)
-                    file = input()
-                    client_socket.send(pickle.dumps(file))
-                    hashed_path = pickle.loads(client_socket.recv(1024))
-                    print(file)
-                    downloadfile(ip, port, hashed_path, folder, file)
-                    client_socket.send(pickle.dumps("Client downloading"))
-
+                    if os.path.isdir(folder):
+                        client_socket.send(pickle.dumps(folder))
+                        ans = pickle.loads(client_socket.recv(1024))
+                        print(ans)
+                        file = input()
+                        client_socket.send(pickle.dumps(file))
+                        hashed_path = pickle.loads(client_socket.recv(1024))
+                        print("Where to save path:")
+                        save = input()
+                        downloadfile(ip, port, hashed_path, folder, file, save)
+                        client_socket.send(pickle.dumps("Client downloading"))
+                    else:
+                        print("No such directory")
         message = input(" -> ")
 
     client_socket.close()
@@ -100,12 +103,13 @@ def uploadfile(host, port, hashed_path, filename):  # Откуда запуск�
     ftp.close()
 
 
-def downloadfile(host, port, hashed_path, folder, filename):  # Откуда запускаешь, туда и сохраняет
+def downloadfile(host, port, hashed_path, folder, filename, save):  # Откуда запускаешь, туда и сохраняет
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
     ftp.cwd(folder)
-    localfile = open(filename, 'wb')
+    save_path = save + '/' + filename
+    localfile = open(save_path, 'wb')
     ftp.retrbinary('RETR ' + hashed_path, localfile.write, 1024)
     print(ftp.pwd())
     ftp.close()
