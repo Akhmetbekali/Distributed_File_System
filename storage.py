@@ -251,6 +251,8 @@ def storage_is_server(port):
             conn.send(pickle.dumps(msg))
         elif data == "Clear2":
             os.system("sudo rm -r Storage/* -f")
+            msg = "Clear"
+            conn.send(pickle.dumps(msg))
         else:
             msg = "error"
             conn.send(pickle.dumps(msg))
