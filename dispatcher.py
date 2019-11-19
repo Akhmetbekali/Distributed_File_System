@@ -79,23 +79,26 @@ def client_server():
                     pickle.loads(conn.recv(1024))
                     msg = "{}:{}".format(ds1_ip, ftp_port)
                     conn.send(pickle.dumps(msg))
-
+                    command = pickle.loads(conn.recv(1024))
+                    conn.send(pickle.dumps(command))
                     directory = pickle.loads(conn.recv(1024))
                     print(directory)
 
-                    print(os.path.isdir(directory))
-                    if os.path.isdir(directory) is True:
+                    if file_structure.get("/{}/".format(directory)) is not None:
                         msg = "Enter the filename: "
                         conn.send(pickle.dumps(msg))
                         filename = pickle.loads(conn.recv(1024))
                         print(filename)
-                        path = directory + filename
+                        path = "{}/{}".format(directory, filename)
                         hashed_path = calc_hash(path)
                         conn.send(pickle.dumps(hashed_path))
                         print("Waiting for connection from DS")
-                        ds_ns = Thread(target=DS_NS_connection, args=())
-                        ds_ns.start()
-                        ds_ns.join()
+                        status = pickle.dumps(conn.recv(1024))
+                        if status == "Client uploaded":
+                            ds_ns = Thread(target=DS_NS_connection, args=(directory, filename, hashed_path))
+                            ds_ns.start()
+                            ds_ns.join()
+
                     else:
                         conn.send(pickle.dumps("No such directory"))
                         print(directory)
@@ -106,7 +109,7 @@ def client_server():
         conn.close()
 
 
-def DS_NS_connection():
+def DS_NS_connection(path, filename):
     print("DSNS in server")
     ds_ns = socket.socket()
     ds_ns.bind(('', ds_ns_port))
@@ -114,8 +117,12 @@ def DS_NS_connection():
     ds_ns, address = ds_ns.accept()
     print("Connection from: " + str(address))
     info = pickle.loads(ds_ns.recv(1024))
-    print(info)
     ds_ns.close()
+    consid_file(info, path, filename)
+    path_content = file_structure.get(path)
+    if path_content is None:
+        return "Error"
+    path_content.append(filename)
 
 
 def mkdir(conn):
