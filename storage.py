@@ -53,10 +53,11 @@ class MyFTPHandler(FTPHandler):
                         new_rep.start()
                     new_rep.join()
                     time.sleep(2)
-        file_info_met(file, ns_ip)
-        # send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
-        # send_file_info.start()
-        # send_file_info.join()
+        # file_info_met(file, ns_ip)
+        send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
+        if send_file_info.isAlive() is False:
+            send_file_info.start()
+        send_file_info.join()
 
 
 def file_info_met(file, ip):
