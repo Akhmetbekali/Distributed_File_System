@@ -73,7 +73,7 @@ def client_server():
                     file_structure["/"] = []
                     path_map.clear()
                     msg = "Clear"
-                    response = storage_server(msg, "")
+                    response = storage_server(ds[0], msg, "")
                     if response == "Clear":
                         msg = "Cleared"
                         conn.send(pickle.dumps(msg))
