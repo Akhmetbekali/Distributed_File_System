@@ -4,6 +4,7 @@ import pickle
 import socket
 import shutil
 from threading import Thread
+from multiprocessing import Process
 
 import constants  # if highlighted - still don't care, it works
 
@@ -104,7 +105,7 @@ def client_server():
                                 status = pickle.loads(conn.recv(1024))
                                 print(status)
                                 # if status == "Client uploaded":
-                                ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
+                                ds_ns = Process(target=DS_NS_connection, args=(directory, filename))
                                 ds_ns.start()
                                 ds_ns.join()
                         if command == "Download":
