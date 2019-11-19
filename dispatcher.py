@@ -9,9 +9,9 @@ from multiprocessing import Process
 
 import constants  # if highlighted - still don't care, it works
 
-# ds1_ip = constants.ds1_ip
-# ds2_ip = constants.ds2_ip
-# ds3_ip = constants.ds3_ip
+ds1_ip = constants.ds1_ip
+ds2_ip = constants.ds2_ip
+ds3_ip = constants.ds3_ip
 ds = [ds1_ip, ds2_ip, ds3_ip]
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
