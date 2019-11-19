@@ -96,6 +96,7 @@ def client_server():
                         conn.send(pickle.dumps(hashed_path))
                         print("Waiting for connection from DS")
                         status = pickle.dumps(conn.recv(1024))
+                        print(status)
                         if status == "Client uploaded":
                             ds_ns = Thread(target=DS_NS_connection, args=(directory, filename, hashed_path))
                             ds_ns.start()
