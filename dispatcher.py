@@ -483,15 +483,17 @@ def storage_server(ip, message, path):
         return "Error", data
 
 
-def ping(connection):
-    hostname = connection
-    response = os.system("ping -c 1 " + hostname)
+def check_servers():
+    for ip in ds:
+        hostname = ip
+        response = os.system("ping -c 1 " + hostname)
 
-    # and then check the response...
-    if response == 0:
-        print(hostname, 'is up!')
-    else:
-        print(hostname, 'is down!')
+        # and then check the response...
+        if response == 0:
+            print(hostname, 'is up!')
+        else:
+            print(hostname, 'is down!')
+            ds.remove(ip)
 
 
 if __name__ == '__main__':
