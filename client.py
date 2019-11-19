@@ -103,7 +103,7 @@ def uploadfile(host, port, hashed_path, filename):  # Откуда запуск�
     ftp.close()
 
 
-def downloadfile(host, port, hashed_path, folder, filename, save):  # Откуда запускаешь, туда и сохраняет
+def downloadfile(host, port, hashed_path, folder, filename, save):
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
