@@ -13,6 +13,7 @@ ds1_ip = constants.ds1_ip
 ds2_ip = constants.ds2_ip
 ds3_ip = constants.ds3_ip
 ds = [ds1_ip, ds2_ip, ds3_ip]
+ds_work = [True, True, True]
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
@@ -29,7 +30,6 @@ server_control = dict()     # format - path/filename : [IPs]
 
 
 def client_server():
-    host = ns_ip
     port = ns_client_port
 
     server_socket = socket.socket()
@@ -65,7 +65,10 @@ def client_server():
                 elif data == "Move file":
                     move_file(conn)
                 elif data == "Initialize":
-                    msg = start_storage(data, ds[0], ns_ds_port)
+                    ip_id = 0
+                    while not ds_work[ip_id]:
+                        ip_id += 1
+                    msg = start_storage(data, ds[ip_id], ns_ds_port)
                     conn.send(pickle.dumps(msg))
                 elif data == "Help":
                     conn.send(pickle.dumps(messages))
@@ -74,7 +77,10 @@ def client_server():
                     file_structure["/"] = []
                     path_map.clear()
                     msg = "Clear"
-                    response = storage_server(ds[0], msg, "")
+                    ip_id = 0
+                    while not ds_work[ip_id]:
+                        ip_id += 1
+                    response = storage_server(ds[ip_id], msg, "")
                     if response == "Clear":
                         msg = "Cleared"
                         conn.send(pickle.dumps(msg))
@@ -82,7 +88,10 @@ def client_server():
                     msg = "IP:"
                     conn.send(pickle.dumps(msg))
                     pickle.loads(conn.recv(1024))
-                    msg = "{}:{}".format(ds[0], ftp_port)
+                    ip_id = 0
+                    while not ds_work[ip_id]:
+                        ip_id += 1
+                    msg = "{}:{}".format(ds[ip_id], ftp_port)
                     conn.send(pickle.dumps(msg))
                     command = pickle.loads(conn.recv(1024))
                     conn.send(pickle.dumps(command))
@@ -225,15 +234,12 @@ def remove_file(name, path):
     else:
         msg = "Delete file"
         for ip in ds:
-            print(ip)
             status, response = storage_server(ip, msg, calc_hash("{}{}".format(current_folder, name)))
-            print(status)
             if status == "Success":
                 if name in path_content:
                     path_content.remove(name)
                     file_structure[current_folder] = path_content
                     path_map.pop("{}{}".format(path, name))
-                print(server_control)
                 if server_control.get("{}{}".format(current_folder, name)) is None:
                     response = "Error: no DS contain file"
                 else:
@@ -491,16 +497,17 @@ def storage_server(ip, message, path):
 
 def check_servers():
     while True:
-        for ip in ds:
+        for num, ip in enumerate(ds):
             hostname = ip
             response = storage_server(ip, "Check", "")
 
             # and then check the response...
             if response == "Check":
                 print(hostname, 'is up!')
+                ds_work[num] = True
             else:
                 print(hostname, 'is down!')
-                ds.remove(ip)
+                ds_work[num] = False
         time.sleep(10)
 
 
