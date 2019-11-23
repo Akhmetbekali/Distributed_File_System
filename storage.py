@@ -25,7 +25,7 @@ ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
 ds_ns_port = constants.ds_ns_port
 
-replication = False
+homedir = os.path.abspath("./Storage")
 
 
 class MyFTPHandler(FTPHandler):
@@ -46,7 +46,7 @@ class MyFTPHandler(FTPHandler):
         print("File received {}".format(file))
         if self.remote_ip not in ds:
             for ip in ds:
-                if ip != get_my_IP():
+                if ip != get_my_ip():
                     print("Replica to " + ip)
                     new_rep = Thread(target=start_replication(file, ip))
                     if new_rep.isAlive() is False:
@@ -54,13 +54,26 @@ class MyFTPHandler(FTPHandler):
                     new_rep.join()
                     time.sleep(2)
         # file_info_met(file, ns_ip)
-        send_file_info = Thread(target=file_info_met, args=(file, ns_ip))
+        send_file_info = Thread(target=file_info, args=(file, ns_ip))
         if send_file_info.isAlive() is False:
             send_file_info.start()
         send_file_info.join()
 
 
-def file_info_met(file, ip):
+# HELPERS
+
+
+def get_my_ip():
+    try:
+        host_name = socket.gethostname()
+        host_ip = socket.gethostbyname(host_name)
+        return host_ip
+    except:
+        print("Unable to get Hostname and IP")
+        return 0
+
+
+def file_info(file, ip):
     print("Creating connection DS -> NS")
     while True:
         try:  # moved this line here
@@ -77,14 +90,7 @@ def file_info_met(file, ip):
     print("Disconnected from " + ip)
 
 
-def get_my_IP():
-    try:
-        host_name = socket.gethostname()
-        host_ip = socket.gethostbyname(host_name)
-        return host_ip
-    except:
-        print("Unable to get Hostname and IP")
-        return 0
+# INSTRUCTION EXECUTORS
 
 
 def start_ftp_server():
@@ -115,11 +121,11 @@ def start_replication(file, ip):
     except:
         return
     ftp.login(user='user', passwd='12345')
-    uploadfile(ftp, file)
+    upload_file(ftp, file)
     return
 
 
-def uploadfile(ftp, file):
+def upload_file(ftp, file):
     print("Upload file " + file)
     filename = file.split('/')[-1]
 
@@ -177,6 +183,9 @@ def move_file(source, destination):
     return file_info
 
 
+# INTERSERVER COMMUNICATION
+
+
 def start_storage(msg, ip, port):
     client_socket = socket.socket()
     client_socket.connect((ip, port))
@@ -205,7 +214,7 @@ def storage_is_server(port):
 
         if data == 'Initialize':
             for ip in ds:
-                if ip != get_my_IP():
+                if ip != get_my_ip():
                     init_ds = Thread(target=start_storage, args=("Replication", ip, ds_ds_tcp_port))
                     if init_ds.isAlive() is False:
                         init_ds.start()
@@ -256,7 +265,7 @@ def storage_is_server(port):
         elif data == "Clear":
             os.system("sudo rm -r Storage/* -f")
             for ip in ds:
-                if ip != get_my_IP():
+                if ip != get_my_ip():
                     clear_ds = Thread(target=start_storage, args=("Clear2", ip, ds_ds_tcp_port))
                     if clear_ds.isAlive() is False:
                         clear_ds.start()
@@ -274,7 +283,6 @@ def storage_is_server(port):
 
 
 if __name__ == '__main__':
-    homedir = os.path.abspath("./Storage")
     ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
     ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
     ns_ds.start()
