@@ -258,7 +258,7 @@ def instruction_listener(port):
             conn.send(pickle.dumps("Backup"))
             ip = pickle.loads(conn.recv(1024))
             backup_files(conn, ip)
-            conn.send(pickle.dumps("Finish backup"))
+            conn.send(pickle.dumps("Finish Backup"))
         elif data == "Create file":
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
