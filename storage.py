@@ -294,7 +294,8 @@ def instruction_listener(port):
 
 
 if __name__ == '__main__':
-    start_ftp_server()
+    ftp = Thread(target=start_ftp_server, daemon=True)
+    ftp.start()
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((ns_ip, ds_ns_port))
