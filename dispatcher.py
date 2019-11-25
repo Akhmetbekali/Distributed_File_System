@@ -393,16 +393,16 @@ def clear(conn):
 def listen_newcomer_ds():
     port = new_ds_port
     conn = socket.socket()
-    # conn.bind(('', port))
+    conn.bind(('', port))
     while True:
         while True:
             try:
-                conn.bind(('', port))
+                # conn.bind(('', port))
+                conn.listen(2)
                 break
             except socket.error:
                 print("Server Failed, Retrying..")
                 time.sleep(1)
-        conn.listen(2)
         conn, address = conn.accept()
         print("Connection from: " + str(address))
 
