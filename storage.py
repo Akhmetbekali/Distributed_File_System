@@ -54,7 +54,7 @@ class MyFTPHandler(FTPHandler):
                     new_rep.join()
                     time.sleep(2)
         # file_info_met(file, ns_ip)
-        send_file_info = Thread(target=file_info, args=(file, ns_ip))
+        send_file_info = Thread(target=file_received_notify, args=(file, ns_ip))
         if send_file_info.isAlive() is False:
             send_file_info.start()
         send_file_info.join()
@@ -73,7 +73,7 @@ def get_my_ip():
         return 0
 
 
-def file_info(file, ip):
+def file_received_notify(file, ip):
     print("Creating connection DS -> NS")
     while True:
         try:  # moved this line here
@@ -84,6 +84,10 @@ def file_info(file, ip):
             print("Connection Failed, Retrying..")
             time.sleep(1)
     print("Connected to " + ip)
+    ds_ns.send(pickle.dumps("New file"))
+    pickle.loads(ds_ns.recv(1024))
+    ds_ns.send(pickle.dumps(file))
+    pickle.loads(ds_ns.recv(1024))
     message = os.stat(file)
     ds_ns.send(pickle.dumps(message))
     ds_ns.close()
@@ -141,8 +145,8 @@ def create_file(file):
     else:
         open(path, 'w')
         print("Succesfully created")
-        file_info = os.stat(path)
-        return file_info
+        file_received_notify(path, ns_ip)
+        return "Success"
 
 
 def delete_file(file):
@@ -163,24 +167,24 @@ def copy_file(source, destination):
     try:
         shutil.copy(source_path, destination_path)
         print("File copied successfully.")
-        file_info = os.stat(destination_path)
+        file_received_notify(destination_path, ns_ip)
 
     except shutil.SameFileError:
-        file_info = "Source and destination represents the same file."
+        return "Source and destination represents the same file."
 
     except IsADirectoryError:
-        file_info = "Destination is a directory."
+        return "Destination is a directory."
     except PermissionError:
-        file_info = "Permission denied."
-    return file_info
+        return "Permission denied."
+    return "Success"
 
 
 def move_file(source, destination):
     source_path = homedir + "/" + source
     destination_path = homedir + "/" + destination
     os.rename(source_path, destination_path)
-    file_info = os.stat(destination_path)
-    return file_info
+    file_received_notify(destination_path, ns_ip)
+    return "Success"
 
 
 def backup_files(conn, ip):
@@ -197,7 +201,7 @@ def backup_files(conn, ip):
 # INTERSERVER COMMUNICATION
 
 
-def start_storage(msg, ip, port):
+def send_instruction(msg, ip, port):
     client_socket = socket.socket()
     client_socket.connect((ip, port))
     client_socket.send(pickle.dumps(msg))
@@ -208,7 +212,7 @@ def start_storage(msg, ip, port):
         return "Error"
 
 
-def storage_is_server(port):
+def instruction_listener(port):
     server_socket = socket.socket()
     server_socket.bind(('', port))
     global ds
@@ -225,15 +229,13 @@ def storage_is_server(port):
             conn.send(pickle.dumps("Check"))
 
         if data == 'Initialize':
+            os.system("sudo rm -r Storage/* -f")
             for ip in ds:
                 if ip != get_my_ip():
-                    init_ds = Thread(target=start_storage, args=("Replication", ip, ds_ds_tcp_port))
-                    if init_ds.isAlive() is False:
-                        init_ds.start()
-                    init_ds.join()
-            start = Thread(target=start_ftp_server, args=())
-            start.start()
-            print("Server started")
+                    clear_ds = Thread(target=send_instruction, args=("Clear", ip, ds_ds_tcp_port))
+                    if clear_ds.isAlive() is False:
+                        clear_ds.start()
+                    clear_ds.join()
             msg = "Server started"
             conn.send(pickle.dumps(msg))
         elif data == "Replication":
@@ -242,7 +244,7 @@ def storage_is_server(port):
             msg = "Server started"
             conn.send(pickle.dumps(msg))
         elif data == "Upload":
-            msg = "Ready to " + data
+            msg = "Ready"
             conn.send(pickle.dumps(msg))
             start_ftp_server()
             pickle.loads(conn.recv(1024))
@@ -250,7 +252,6 @@ def storage_is_server(port):
         elif data == "Update DS":
             conn.send(pickle.dumps("Update"))
             servers = pickle.loads(conn.recv(1024))
-            # global ds
             ds = servers
             conn.send(pickle.dumps("Success"))
         elif data == "Backup":
@@ -261,39 +262,28 @@ def storage_is_server(port):
         elif data == "Create file":
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
-            file_info = create_file(path)
-            conn.send(pickle.dumps(file_info))
+            msg = create_file(path)
+            conn.send(pickle.dumps(msg))
         elif data == "Delete file":
-            print("Delete")
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
-            file_info = delete_file(path)
-            conn.send(pickle.dumps(file_info))
+            msg = delete_file(path)
+            conn.send(pickle.dumps(msg))
         elif data == "Copy file":
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
             source = path.split(" ")[0]
             destination = path.split(" ")[1]
-            file_info = copy_file(source, destination)
-            conn.send(pickle.dumps(file_info))
+            msg = copy_file(source, destination)
+            conn.send(pickle.dumps(msg))
         elif data == "Move file":
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))
             source = path.split(" ")[0]
             destination = path.split(" ")[1]
-            file_info = move_file(source, destination)
-            conn.send(pickle.dumps(file_info))
-        elif data == "Clear":
-            os.system("sudo rm -r Storage/* -f")
-            for ip in ds:
-                if ip != get_my_ip():
-                    clear_ds = Thread(target=start_storage, args=("Clear2", ip, ds_ds_tcp_port))
-                    if clear_ds.isAlive() is False:
-                        clear_ds.start()
-                    clear_ds.join()
-            msg = "Clear"
+            msg = move_file(source, destination)
             conn.send(pickle.dumps(msg))
-        elif data == "Clear2":
+        elif data == "Clear":
             os.system("sudo rm -r Storage/* -f")
             msg = "Clear"
             conn.send(pickle.dumps(msg))
@@ -304,14 +294,15 @@ def storage_is_server(port):
 
 
 if __name__ == '__main__':
+    start_ftp_server()
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        print("Socket zawel")
         s.connect((ns_ip, new_ds_port))
         s.send(pickle.dumps("New"))
         data = pickle.loads(s.recv(1024))
 
-    ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
-    ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
+    ns_ds = Thread(target=instruction_listener, args=(ns_ds_port,))
+    ds_ds = Thread(target=instruction_listener, args=(ds_ds_tcp_port,))
     ns_ds.start()
     ds_ds.start()
     ns_ds.join()

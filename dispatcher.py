@@ -25,6 +25,7 @@ servers = []
 file_structure = dict()  # format - path : list of directories and files inside
 current_folder = "/"  # string with the path of current folder
 path_map = dict()  # format - path/filename : [hashcode, file info]
+hash_table = dict()
 server_control = dict()     # format - hash : [IPs]
 
 messages = ["Initialize", "Create file", "Delete file", "File info", "Copy file", "Move file",
@@ -45,11 +46,12 @@ def load_dict(name):
         return pickle.load(f)
 
 
-def consid_file(response, path, filename):  # TODO write file info after Uploading and replication
-    file_info = response
+def consid_file(path, filename):  # TODO write file info after Uploading and replication
     hashcode = calc_hash("{}{}".format(path, filename))
     if path_map.get("{}{}".format(path, filename)) is None:
-        path_map["{}{}".format(path, filename)] = [hashcode, file_info]
+        path_map["{}{}".format(path, filename)] = [hashcode, None]
+    if hash_table.get(hashcode) is None:
+        hash_table[hashcode] = "{}{}".format(path, filename)
 
 
 def calc_hash(file_path):
@@ -62,10 +64,7 @@ def check_servers():
             hostname = ip
             response = send_message_to_ds(ip, "Check", "")
 
-            # and then check the response...
-            if response == "Check":
-                print(hostname, 'is up!')
-            else:
+            if response != "Check":
                 print(hostname, 'is down!')
                 servers.remove(ip)
         time.sleep(10)
@@ -150,23 +149,31 @@ def remove_file(name, path):    # TODO: check response values
         return msg
     else:
         msg = "Delete file"
-        for ip in servers:
+        success = True
+        response = None
+        servers_with_file = server_control.get(calc_hash("{}{}".format(current_folder, name)))
+        for ip in servers_with_file:
             status, response = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, name)))
-            if status == "Success":
-                if name in path_content:
-                    path_content.remove(name)
-                    file_structure[current_folder] = path_content
-                    path_map.pop("{}{}".format(path, name))
-                if server_control.get(calc_hash("{}{}".format(current_folder, name))) is None:
-                    response = "Error: no DS contain file"
-                else:
-                    ips = server_control.get(calc_hash("{}{}".format(current_folder, name)))
-                    if ip in ips:
-                        ips.remove(ip)
+            if status != "Success":
+                success = False
+        if success:
+            if name in path_content:
+                path_content.remove(name)
+                file_structure[current_folder] = path_content
+                path_map.pop("{}{}".format(path, name))
+                hash_table.pop(calc_hash("{}{}".format(path, name)))
+            if server_control.get(calc_hash("{}{}".format(current_folder, name))) is None:
+                response = "Error: no DS contain file"
             else:
-                msg = "Error: {}".format(response)
-                response = msg
-        return response
+                ips = server_control.get(calc_hash("{}{}".format(current_folder, name)))
+                if ip in ips:
+                    ips.remove(ip)
+        else:
+            msg = "Error: {}".format(response)
+            response = msg
+            success = False
+        if success:
+            return
 
 
 def readdir(conn):
@@ -211,22 +218,19 @@ def mkfile(conn):
         msg = "Create file"
         counter = 0
         for ip in servers:
-            counter += 1
-            status, response = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, filename)))
+            status = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, filename)))
             if status == "Success":
                 if filename not in path_content:
                     path_content.append(filename)
                     file_structure[current_folder] = path_content
-                    consid_file(response, current_folder, filename)
+                    consid_file(current_folder, filename)
                 if server_control.get(calc_hash("{}{}".format(current_folder, filename))) is None:
                     server_control[calc_hash("{}{}".format(current_folder, filename))] = [ip]
                 else:
                     ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
                     ips.append(ip)
-                if counter < 2:
-                    conn.send(pickle.dumps(response))
             else:
-                msg = "Error: {}".format(response)
+                msg = "Error: {}".format(status)
                 if counter < 2:
                     conn.send(pickle.dumps(msg))
 
@@ -281,11 +285,10 @@ def copy_file(conn):
     msg = "Copy file"
     counter = 0
     for ip in servers:
-        counter += 1
-        status, response = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
+        status = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                       calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
-            consid_file(response, destination, filename)
+            consid_file(destination, filename)
             if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
                 server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
             else:
@@ -294,9 +297,7 @@ def copy_file(conn):
             # if counter < 2:
             #     conn.send(pickle.dumps(response))
         else:
-            msg = "Error: {}".format(response)
-            if counter < 2:
-                conn.send(pickle.dumps(msg))
+            msg = "Error: {}".format(status)
         dest_content = file_structure[destination]
         if filename not in dest_content:
             dest_content.append(filename)
@@ -335,22 +336,17 @@ def move_file(conn):
     msg = "Move file"
     counter = 0
     for ip in servers:
-        counter += 1
-        status, response = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
+        status = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                       calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
-            consid_file(response, destination, filename)
+            consid_file(destination, filename)
             if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
                 server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
             else:
                 ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
                 ips.append(ip)
-            # if counter < 2:
-            #     conn.send(pickle.dumps(response))
         else:
-            msg = "Error: {}".format(response)
-            if counter < 2:
-                conn.send(pickle.dumps(msg))
+            msg = "Error: {}".format(status)
         dest_content = file_structure[destination]
         if filename not in dest_content:
             dest_content.append(filename)
@@ -408,11 +404,25 @@ def listen_newcomer_ds():
                 if ip != address[0]:
                     send_message_to_ds(ip, "Update DS", servers)
             send_message_to_ds(servers[0], "Backup", address[0])
+        if data == "New file":
+            conn.send(pickle.dumps("File"))
+            hashcode = pickle.loads(conn.recv(1024))
+            conn.send(pickle.dumps("Info"))
+            file_info = pickle.loads(conn.recv(1024))
+            file_containers = server_control.get(hashcode)
+            if file_containers is None:
+                file_containers = [address[0]]
+                server_control[hashcode] = file_containers
+            else:
+                file_containers.append(address[0])
+            for file in path_map.values():
+                if file[0] == hashcode:
+                    if file[1] is not None:
+                        file[1] = file_info
         else:
             conn.send(pickle.dumps("Error"))
         conn.close()
         print("Connection closed: " + str(address))
-    # conn.close()
 
 
 def send_message_to_ds(ip, message, content):
@@ -431,9 +441,9 @@ def send_message_to_ds(ip, message, content):
     data = pickle.loads(client_socket.recv(1024))
     if data in content_response:
         client_socket.send(pickle.dumps(content))
-        response = pickle.loads(client_socket.recv(1024))
+        pickle.loads(client_socket.recv(1024))
         client_socket.close()
-        return "Success", response
+        return "Success"
     elif data == "Backup":
         client_socket.send(pickle.dumps(content))
         response = pickle.loads(client_socket.recv(1024))
@@ -447,36 +457,36 @@ def send_message_to_ds(ip, message, content):
     else:
         print("Error")
         client_socket.close()
-        return "Error", data
+        return data
 
 
-def get_response_on_new_file(path, filename):
-    counter = 0
-    working_servers = len(servers)
-    while counter < working_servers:
-        ds_ns = socket.socket()
-        while True:
-            try:
-                ds_ns.bind(('', ds_ns_port))
-                break
-            except socket.error:
-                print("Connection Failed, Retrying..")
-                time.sleep(1)
-        ds_ns.listen(2)
-        ds_ns, address = ds_ns.accept()
-        print("Connection from: " + str(address))
-        info = pickle.loads(ds_ns.recv(1024))
-        if path_map.get("{}{}".format(path, filename)) is None:
-            consid_file(info, path, filename)
-            print(path_map)
-        if server_control.get(calc_hash("{}{}".format(path, filename))) is None:
-            server_control[calc_hash("{}{}".format(path, filename))] = [address[0]]
-        else:
-            ips = server_control.get(calc_hash("{}{}".format(path, filename)))
-            ips.append(address[0])
-        print(server_control)
-        ds_ns.close()
-        counter += 1
+# def get_response_on_new_file(path, filename):
+#     counter = 0
+#     working_servers = len(servers)
+#     while counter < working_servers:
+#         ds_ns = socket.socket()
+#         while True:
+#             try:
+#                 ds_ns.bind(('', ds_ns_port))
+#                 break
+#             except socket.error:
+#                 print("Connection Failed, Retrying..")
+#                 time.sleep(1)
+#         ds_ns.listen(2)
+#         ds_ns, address = ds_ns.accept()
+#         print("Connection from: " + str(address))
+#         info = pickle.loads(ds_ns.recv(1024))
+#         if path_map.get("{}{}".format(path, filename)) is None:
+#             consid_file(path, filename)
+#             print(path_map)
+#         if server_control.get(calc_hash("{}{}".format(path, filename))) is None:
+#             server_control[calc_hash("{}{}".format(path, filename))] = [address[0]]
+#         else:
+#             ips = server_control.get(calc_hash("{}{}".foconsidrmat(path, filename)))
+#             ips.append(address[0])
+#         print(server_control)
+#         ds_ns.close()
+#         counter += 1
 
 
 def client_server():
