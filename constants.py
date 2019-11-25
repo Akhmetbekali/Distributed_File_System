@@ -3,8 +3,8 @@
 # ds2_ip = "172.31.26.191"
 # ds3_ip = "172.31.31.92"
 
-client_ip = "172.31.25.60"
-ns_ip = "172.31.22.98"
+client_ip = "172.31.18.38"
+ns_ip = "172.31.20.7"
 ftp_port = 8000
 ns_client_port = 8081
 ns_ds_port = 8080
