@@ -211,6 +211,7 @@ def start_storage(msg, ip, port):
 def storage_is_server(port):
     server_socket = socket.socket()
     server_socket.bind(('', port))
+    global ds
     while True:
         server_socket.listen(2)
         conn, address = server_socket.accept()
@@ -249,7 +250,7 @@ def storage_is_server(port):
         elif data == "Update DS":
             conn.send(pickle.dumps("Update"))
             servers = pickle.loads(conn.recv(1024))
-            global ds
+            # global ds
             ds = servers
             conn.send(pickle.dumps("Success"))
         elif data == "Backup":
@@ -304,6 +305,7 @@ def storage_is_server(port):
 
 if __name__ == '__main__':
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        print("Socket zawel")
         s.connect((ns_ip, new_ds_port))
         s.send(pickle.dumps("New"))
         data = pickle.loads(s.recv(1024))
