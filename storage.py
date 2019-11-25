@@ -182,6 +182,17 @@ def move_file(source, destination):
     return file_info
 
 
+def backup_files(conn, ip):
+    for file in os.listdir(homedir):
+        if not '.' in file:
+            start_replication("{}/{}".format(homedir, file), ip)
+            conn.send(pickle.dumps(file))
+            data = pickle.loads(conn.recv(1024))
+            if data != "Received":
+                return
+    return
+
+
 # INTERSERVER COMMUNICATION
 
 
@@ -224,8 +235,6 @@ def storage_is_server(port):
             msg = "Server started"
             conn.send(pickle.dumps(msg))
         elif data == "Replication":
-            global replication
-            replication = True
             start = Thread(target=start_ftp_server, args=())
             start.start()
             msg = "Server started"
@@ -236,6 +245,17 @@ def storage_is_server(port):
             start_ftp_server()
             pickle.loads(conn.recv(1024))
             conn.send(pickle.dumps("OK"))
+        elif data == "Update DS":
+            conn.send(pickle.dumps("Update"))
+            servers = pickle.loads(conn.recv(1024))
+            global ds
+            ds = servers
+            conn.send(pickle.dumps("Success"))
+        elif data == "Backup":
+            conn.send(pickle.dumps("Backup"))
+            ip = pickle.loads(conn.recv(1024))
+            backup_files(conn, ip)
+            conn.send(pickle.dumps("Finish backup"))
         elif data == "Create file":
             conn.send(pickle.dumps("Ready"))
             path = pickle.loads(conn.recv(1024))

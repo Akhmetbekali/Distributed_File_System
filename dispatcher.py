@@ -24,7 +24,7 @@ servers = [ds1_ip, ds2_ip, ds3_ip]
 file_structure = dict()  # format - path : list of directories and files inside
 current_folder = "/"  # string with the path of current folder
 path_map = dict()  # format - path/filename : [hashcode, file info]
-server_control = dict()     # format - path/filename : [IPs]
+server_control = dict()     # format - hash : [IPs]
 
 messages = ["Initialize", "Create file", "Delete file", "File info", "Copy file", "Move file",
             "Open directory", "Read directory", "Make directory", "Delete directory",
@@ -59,7 +59,7 @@ def check_servers():
     while True:
         for ip in servers:
             hostname = ip
-            response = storage_server(ip, "Check", "")
+            response = send_message_to_ds(ip, "Check", "")
 
             # and then check the response...
             if response == "Check":
@@ -150,16 +150,16 @@ def remove_file(name, path):    # TODO: check response values
     else:
         msg = "Delete file"
         for ip in servers:
-            status, response = storage_server(ip, msg, calc_hash("{}{}".format(current_folder, name)))
+            status, response = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, name)))
             if status == "Success":
                 if name in path_content:
                     path_content.remove(name)
                     file_structure[current_folder] = path_content
                     path_map.pop("{}{}".format(path, name))
-                if server_control.get("{}{}".format(current_folder, name)) is None:
+                if server_control.get(calc_hash("{}{}".format(current_folder, name))) is None:
                     response = "Error: no DS contain file"
                 else:
-                    ips = server_control.get("{}{}".format(current_folder, name))
+                    ips = server_control.get(calc_hash("{}{}".format(current_folder, name)))
                     if ip in ips:
                         ips.remove(ip)
             else:
@@ -211,16 +211,16 @@ def mkfile(conn):
         counter = 0
         for ip in servers:
             counter += 1
-            status, response = storage_server(ip, msg, calc_hash("{}{}".format(current_folder, filename)))
+            status, response = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, filename)))
             if status == "Success":
                 if filename not in path_content:
                     path_content.append(filename)
                     file_structure[current_folder] = path_content
                     consid_file(response, current_folder, filename)
-                if server_control.get("{}{}".format(current_folder, filename)) is None:
-                    server_control["{}{}".format(current_folder, filename)] = [ip]
+                if server_control.get(calc_hash("{}{}".format(current_folder, filename))) is None:
+                    server_control[calc_hash("{}{}".format(current_folder, filename))] = [ip]
                 else:
-                    ips = server_control.get("{}{}".format(current_folder, filename))
+                    ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
                     ips.append(ip)
                 if counter < 2:
                     conn.send(pickle.dumps(response))
@@ -281,14 +281,14 @@ def copy_file(conn):
     counter = 0
     for ip in servers:
         counter += 1
-        status, response = storage_server(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
-                                          calc_hash("{}{}".format(destination, filename))))
+        status, response = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
+                                                                      calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(response, destination, filename)
-            if server_control.get("{}{}".format(destination, filename)) is None:
-                server_control["{}{}".format(destination, filename)] = [ip]
+            if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
+                server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
             else:
-                ips = server_control.get("{}{}".format(destination, filename))
+                ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
                 ips.append(ip)
             # if counter < 2:
             #     conn.send(pickle.dumps(response))
@@ -335,14 +335,14 @@ def move_file(conn):
     counter = 0
     for ip in servers:
         counter += 1
-        status, response = storage_server(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
-                                                                  calc_hash("{}{}".format(destination, filename))))
+        status, response = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
+                                                                      calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(response, destination, filename)
-            if server_control.get("{}{}".format(destination, filename)) is None:
-                server_control["{}{}".format(destination, filename)] = [ip]
+            if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
+                server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
             else:
-                ips = server_control.get("{}{}".format(destination, filename))
+                ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
                 ips.append(ip)
             # if counter < 2:
             #     conn.send(pickle.dumps(response))
@@ -364,7 +364,7 @@ def move_file(conn):
 
 def initialize(conn):
     ip_id = 0
-    msg = start_storage("Initialize", servers[ip_id], ns_ds_port)
+    msg = send_message_to_ds(servers[ip_id], "Initialize")
     conn.send(pickle.dumps(msg))
 
 
@@ -378,7 +378,7 @@ def clear(conn):
     path_map.clear()
     msg = "Clear"
     ip_id = 0
-    response = storage_server(servers[ip_id], msg, "")
+    response = send_message_to_ds(servers[ip_id], msg, "")
     if response == "Clear":
         msg = "Cleared"
         conn.send(pickle.dumps(msg))
@@ -389,18 +389,30 @@ def clear(conn):
 # TODO: listener of new data storages
 
 
-def start_storage(msg, ip, port):
-    client_socket = socket.socket()
-    client_socket.connect((ip, port))
-    client_socket.send(pickle.dumps(msg))
-    data = pickle.loads(client_socket.recv(1024))
-    if data == "Server started":
-        return data
-    else:
-        return "Error"
+def listen_newcomer_ds():
+    port = ds_ns_port
+    conn = socket.socket()
+    conn.bind(('', port))
+    while True:
+        conn.listen(2)
+        conn, address = conn.accept()
+        print("Connection from: " + str(address))
+
+        data = pickle.loads(conn.recv(1024))
+        if data == "New":
+            servers.append(address[0])
+            conn.send(pickle.dumps("Received"))
+            conn.close()
+            send_message_to_ds(servers[0], "Update DS", servers)
+            send_message_to_ds(servers[0], "Backup", address[0])
+        else:
+            conn.send(pickle.dumps("Error"))
+            conn.close()
 
 
-def storage_server(ip, message, path):
+def send_message_to_ds(ip, message, content):
+    simple_response = ["Clear", "Check", "Server started"]
+    content_response = ["Ready", "Update"]
     host = ip
     port = ns_ds_port
     client_socket = socket.socket()
@@ -412,14 +424,20 @@ def storage_server(ip, message, path):
     client_socket.send(pickle.dumps(message))
 
     data = pickle.loads(client_socket.recv(1024))
-    if data == "Ready":
-        client_socket.send(pickle.dumps(path))
+    if data in content_response:
+        client_socket.send(pickle.dumps(content))
         response = pickle.loads(client_socket.recv(1024))
         client_socket.close()
         return "Success", response
-    elif data == "Clear":
-        return data
-    elif data == "Check":
+    elif data == "Backup":
+        client_socket.send(pickle.dumps(content))
+        response = pickle.loads(client_socket.recv(1024))
+        while response != "Finish Backup":
+            file_servers = server_control.get(response)
+            file_servers.append(content)
+            client_socket.send(pickle.loads("Received"))
+            response = pickle.loads(client_socket.recv(1024))
+    elif data in simple_response:
         return data
     else:
         print("Error")
@@ -427,10 +445,9 @@ def storage_server(ip, message, path):
         return "Error", data
 
 
-def DS_NS_connection(path, filename):
+def get_response_on_new_file(path, filename):
     counter = 0
     working_servers = len(servers)
-    print(working_servers)
     while counter < working_servers:
         ds_ns = socket.socket()
         while True:
@@ -447,10 +464,10 @@ def DS_NS_connection(path, filename):
         if path_map.get("{}{}".format(path, filename)) is None:
             consid_file(info, path, filename)
             print(path_map)
-        if server_control.get("{}{}".format(path, filename)) is None:
-            server_control["{}{}".format(path, filename)] = [address[0]]
+        if server_control.get(calc_hash("{}{}".format(path, filename))) is None:
+            server_control[calc_hash("{}{}".format(path, filename))] = [address[0]]
         else:
-            ips = server_control.get("{}{}".format(path, filename))
+            ips = server_control.get(calc_hash("{}{}".format(path, filename)))
             ips.append(address[0])
         print(server_control)
         ds_ns.close()
@@ -555,7 +572,7 @@ def client_server():
                                     path_content.append(filename)
                                     file_structure[directory] = path_content
                                     print(file_structure)
-                                ds_ns = Thread(target=DS_NS_connection, args=(directory, filename))
+                                ds_ns = Thread(target=get_response_on_new_file, args=(directory, filename))
                                 ds_ns.start()
                                 ds_ns.join()
                         if command == "Download":
@@ -572,6 +589,8 @@ def client_server():
 
 
 if __name__ == '__main__':
+    checker = Thread(target=check_servers, daemon=True)
+    checker.start()
     checker = Thread(target=check_servers, daemon=True)
     checker.start()
     client_server()
