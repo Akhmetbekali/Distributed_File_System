@@ -410,14 +410,13 @@ def listen_newcomer_ds():
         if data == "New":
             servers.append(address[0])
             conn.send(pickle.dumps("Received"))
-            conn.close()
             for ip in servers:
                 if ip != address[0]:
                     send_message_to_ds(ip, "Update DS", servers)
             send_message_to_ds(servers[0], "Backup", address[0])
         else:
             conn.send(pickle.dumps("Error"))
-            conn.close()
+        conn.close()
 
 
 def send_message_to_ds(ip, message, content):
