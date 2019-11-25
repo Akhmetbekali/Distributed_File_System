@@ -395,15 +395,9 @@ def listen_newcomer_ds():
     conn = socket.socket()
     conn.bind(('', port))
     conn.listen(3)
+
     while True:
-        while True:
-            try:
-                # conn.bind(('', port))
-                conn, address = conn.accept()
-                break
-            except socket.error:
-                print("Server Failed, Retrying..")
-                time.sleep(1)
+        conn, address = conn.accept()
         print("Connection from: " + str(address))
 
         data = pickle.loads(conn.recv(1024))
@@ -417,6 +411,7 @@ def listen_newcomer_ds():
         else:
             conn.send(pickle.dumps("Error"))
         conn.close()
+        print("Connection closed: " + str(address))
 
 
 def send_message_to_ds(ip, message, content):
