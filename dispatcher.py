@@ -387,7 +387,7 @@ def clear(conn):
 
 
 def listen_newcomer_ds():
-    port = new_ds_port
+    port = ds_ns_port
     server = socket.socket()
     server.bind(('', port))
     server.listen(3)
@@ -494,8 +494,8 @@ def client_server():
 
     server_socket = socket.socket()
     server_socket.bind(('', port))
+    server_socket.listen(2)
     while True:
-        server_socket.listen(2)
         conn, address = server_socket.accept()
         print("Connection from: " + str(address))
 
@@ -587,9 +587,6 @@ def client_server():
                                     path_content.append(filename)
                                     file_structure[directory] = path_content
                                     print(file_structure)
-                                ds_ns = Thread(target=get_response_on_new_file, args=(directory, filename))
-                                ds_ns.start()
-                                ds_ns.join()
                         if command == "Download":
                             hashed_path = calc_hash(path)
                             conn.send(pickle.dumps(hashed_path))

@@ -215,9 +215,9 @@ def send_instruction(msg, ip, port):
 def instruction_listener(port):
     server_socket = socket.socket()
     server_socket.bind(('', port))
+    server_socket.listen(2)
     global ds
     while True:
-        server_socket.listen(2)
         conn, address = server_socket.accept()
         print("Connection from: " + str(address))
 
@@ -297,7 +297,7 @@ if __name__ == '__main__':
     start_ftp_server()
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((ns_ip, new_ds_port))
+        s.connect((ns_ip, ds_ns_port))
         s.send(pickle.dumps("New"))
         data = pickle.loads(s.recv(1024))
 
