@@ -361,7 +361,7 @@ def move_file(conn):
 
 def initialize(conn):
     ip_id = 0
-    msg = send_message_to_ds(servers[ip_id], "Initialize")
+    msg = send_message_to_ds(servers[ip_id], "Initialize", "")
     conn.send(pickle.dumps(msg))
 
 
@@ -398,6 +398,7 @@ def listen_newcomer_ds():
 
         data = pickle.loads(conn.recv(1024))
         if data == "New":
+
             servers.append(address[0])
             conn.send(pickle.dumps("Received"))
             for ip in servers:
@@ -449,7 +450,10 @@ def send_message_to_ds(ip, message, content):
         response = pickle.loads(client_socket.recv(1024))
         while response != "Finish Backup":
             file_servers = server_control.get(response)
-            file_servers.append(content)
+            if file_servers is not None:
+                file_servers.append(content)
+            else:
+                server_control[response] = [content]
             client_socket.send(pickle.loads("Received"))
             response = pickle.loads(client_socket.recv(1024))
     elif data in simple_response:
@@ -606,4 +610,3 @@ if __name__ == '__main__':
     checker = Thread(target=check_servers, daemon=True)
     checker.start()
     client_server()
-
