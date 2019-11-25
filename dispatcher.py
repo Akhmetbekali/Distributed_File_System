@@ -403,7 +403,9 @@ def listen_newcomer_ds():
             servers.append(address[0])
             conn.send(pickle.dumps("Received"))
             conn.close()
-            send_message_to_ds(servers[0], "Update DS", servers)
+            for ip in servers:
+                if ip != address[0]:
+                    send_message_to_ds(ip, "Update DS", servers)
             send_message_to_ds(servers[0], "Backup", address[0])
         else:
             conn.send(pickle.dumps("Error"))
@@ -424,7 +426,7 @@ def send_message_to_ds(ip, message, content):
     client_socket.send(pickle.dumps(message))
 
     data = pickle.loads(client_socket.recv(1024))
-    if data in content_response:
+    if data == "Ready":
         client_socket.send(pickle.dumps(content))
         response = pickle.loads(client_socket.recv(1024))
         client_socket.close()
