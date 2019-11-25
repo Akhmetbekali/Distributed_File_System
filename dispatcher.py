@@ -605,6 +605,7 @@ def client_server():
 
 
 if __name__ == '__main__':
+    init()
     new_ds_checker = Thread(target=listen_newcomer_ds, daemon=True)
     new_ds_checker.start()
     checker = Thread(target=check_servers, daemon=True)
