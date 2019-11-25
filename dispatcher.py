@@ -392,12 +392,12 @@ def clear(conn):
 
 def listen_newcomer_ds():
     port = new_ds_port
-    conn = socket.socket()
-    conn.bind(('', port))
-    conn.listen(3)
+    server = socket.socket()
+    server.bind(('', port))
+    server.listen(3)
 
     while True:
-        conn, address = conn.accept()
+        conn, address = server.accept()
         print("Connection from: " + str(address))
 
         data = pickle.loads(conn.recv(1024))
@@ -410,8 +410,9 @@ def listen_newcomer_ds():
             send_message_to_ds(servers[0], "Backup", address[0])
         else:
             conn.send(pickle.dumps("Error"))
-        # conn.close()
+        conn.close()
         print("Connection closed: " + str(address))
+    # conn.close()
 
 
 def send_message_to_ds(ip, message, content):
