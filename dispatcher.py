@@ -410,7 +410,7 @@ def listen_newcomer_ds():
             send_message_to_ds(servers[0], "Backup", address[0])
         else:
             conn.send(pickle.dumps("Error"))
-        conn.close()
+        # conn.close()
         print("Connection closed: " + str(address))
 
 
