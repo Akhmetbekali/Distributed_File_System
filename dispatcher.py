@@ -9,9 +9,9 @@ from multiprocessing import Process
 
 import constants  # if highlighted - still don't care, it works
 
-ds1_ip = constants.ds1_ip
-ds2_ip = constants.ds2_ip
-ds3_ip = constants.ds3_ip
+# ds1_ip = constants.ds1_ip
+# ds2_ip = constants.ds2_ip
+# ds3_ip = constants.ds3_ip
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
@@ -19,8 +19,9 @@ ns_client_port = constants.ns_client_port
 ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
 ds_ns_port = constants.ds_ns_port
+new_ds_port = constants.new_ds_port
 
-servers = [ds1_ip, ds2_ip, ds3_ip]
+servers = []
 file_structure = dict()  # format - path : list of directories and files inside
 current_folder = "/"  # string with the path of current folder
 path_map = dict()  # format - path/filename : [hashcode, file info]
@@ -390,7 +391,7 @@ def clear(conn):
 
 
 def listen_newcomer_ds():
-    port = ds_ns_port
+    port = new_ds_port
     conn = socket.socket()
     conn.bind(('', port))
     while True:
@@ -591,8 +592,8 @@ def client_server():
 
 
 if __name__ == '__main__':
-    checker = Thread(target=check_servers, daemon=True)
-    checker.start()
+    new_ds_checker = Thread(target=listen_newcomer_ds, daemon=True)
+    new_ds_checker.start()
     checker = Thread(target=check_servers, daemon=True)
     checker.start()
     client_server()

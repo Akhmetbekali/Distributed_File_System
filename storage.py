@@ -12,10 +12,10 @@ import pickle
 import os
 import constants        # if highlighted - still don't care, it works
 
-ds1_ip = constants.ds1_ip
-ds2_ip = constants.ds2_ip
-ds3_ip = constants.ds3_ip
-ds = [ds1_ip, ds2_ip, ds3_ip]
+# ds1_ip = constants.ds1_ip
+# ds2_ip = constants.ds2_ip
+# ds3_ip = constants.ds3_ip
+ds = []
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
@@ -23,6 +23,7 @@ ns_client_port = constants.ns_client_port
 ns_ds_port = constants.ns_ds_port
 ds_ds_tcp_port = constants.ds_ds_tcp_port
 ds_ns_port = constants.ds_ns_port
+new_ds_port = constants.new_ds_port
 
 homedir = os.path.abspath("./Storage")
 
@@ -302,6 +303,11 @@ def storage_is_server(port):
 
 
 if __name__ == '__main__':
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((ns_ip, new_ds_port))
+        s.send(pickle.dumps("New"))
+        data = pickle.loads(s.recv(1024))
+
     ns_ds = Thread(target=storage_is_server, args=(ns_ds_port,))
     ds_ds = Thread(target=storage_is_server, args=(ds_ds_tcp_port,))
     ns_ds.start()
