@@ -426,7 +426,7 @@ def send_message_to_ds(ip, message, content):
     client_socket.send(pickle.dumps(message))
 
     data = pickle.loads(client_socket.recv(1024))
-    if data == "Ready":
+    if data in content_response:
         client_socket.send(pickle.dumps(content))
         response = pickle.loads(client_socket.recv(1024))
         client_socket.close()
