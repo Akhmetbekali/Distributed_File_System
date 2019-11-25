@@ -394,16 +394,16 @@ def listen_newcomer_ds():
     port = new_ds_port
     conn = socket.socket()
     conn.bind(('', port))
+    conn.listen(3)
     while True:
         while True:
             try:
                 # conn.bind(('', port))
-                conn.listen(2)
+                conn, address = conn.accept()
                 break
             except socket.error:
                 print("Server Failed, Retrying..")
                 time.sleep(1)
-        conn, address = conn.accept()
         print("Connection from: " + str(address))
 
         data = pickle.loads(conn.recv(1024))
