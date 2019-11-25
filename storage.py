@@ -301,6 +301,8 @@ if __name__ == '__main__':
         s.connect((ns_ip, ds_ns_port))
         s.send(pickle.dumps("New"))
         data = pickle.loads(s.recv(1024))
+        ds = data
+        s.close()
 
     ns_ds = Thread(target=instruction_listener, args=(ns_ds_port,))
     ds_ds = Thread(target=instruction_listener, args=(ds_ds_tcp_port,))

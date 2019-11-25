@@ -390,7 +390,7 @@ def listen_newcomer_ds():
     port = ds_ns_port
     server = socket.socket()
     server.bind(('', port))
-    server.listen(3)
+    server.listen(6)
 
     while True:
         conn, address = server.accept()
@@ -400,11 +400,12 @@ def listen_newcomer_ds():
         if data == "New":
 
             servers.append(address[0])
-            conn.send(pickle.dumps("Received"))
+            conn.send(pickle.dumps(servers))
             for ip in servers:
                 if ip != address[0]:
                     send_message_to_ds(ip, "Update DS", servers)
-            send_message_to_ds(servers[0], "Backup", address[0])
+            if len(servers) > 1:
+                send_message_to_ds(servers[0], "Backup", address[0])
         if data == "New file":
             conn.send(pickle.dumps("File"))
             hashcode = pickle.loads(conn.recv(1024))
