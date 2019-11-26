@@ -298,11 +298,11 @@ def copy_file(conn):
                                                                       calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(destination, filename)
-            if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
-                server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
-            else:
-                ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
-                ips.append(ip)
+            # if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
+            #     server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
+            # else:
+            #     ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
+            #     ips.append(ip)
         else:
             msg = "Error: {}".format(status)
         dest_content = file_structure[destination]
@@ -346,11 +346,11 @@ def move_file(conn):
                                                                       calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(destination, filename)
-            if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
-                server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
-            else:
-                ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
-                ips.append(ip)
+            # if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
+            #     server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
+            # else:
+            #     ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
+            #     ips.append(ip)
         else:
             msg = "Error: {}".format(status)
         dest_content = file_structure[destination]
