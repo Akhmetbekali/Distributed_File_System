@@ -40,10 +40,72 @@ def print_data(data):
         return True
 
 
+def upload_script(conn):
+    conn.send(pickle.dumps("Upload"))
+    pickle.loads(conn.recv(1024))
+    print("Enter uploading path ( '/' is current): ")
+    folder = input("->")
+    if os.path.isdir(folder):
+        print("Enter destination path on Storage: ")
+        destination = input("->")
+        conn.send(pickle.dumps(destination))
+        pickle.loads(conn.recv(1024))
+        print("Enter filename: ")
+        filename = input("->")
+        conn.send(pickle.dumps(filename))
+        address = pickle.loads(conn.recv(1024))
+        if ':' in address:
+            ip = address.split(":")[0]
+            port = int(address.split(":")[1])
+            conn.send(pickle.dumps("Name"))
+            hashcode = pickle.loads(conn.recv(1024))
+            if folder != "/":
+                folder = folder + '/' + filename
+            else:
+                folder = filename
+            upload_file(ip, port, hashcode, folder)
+        else:
+            print(address)
+    else:
+        conn.send(pickle.dumps("Error"))
+    return
+
+
+def download_script(conn):
+    conn.send(pickle.dumps("Download"))
+    pickle.loads(conn.recv(1024))
+    print("Enter destination path on host ( '/' is current): ")
+    folder = input("->")
+    print("Enter path on Storage: ")
+    destination = input("->")
+    if os.path.isdir(folder):
+        conn.send(pickle.dumps(destination))
+        pickle.loads(conn.recv(1024))
+        print("Enter filename: ")
+        filename = input("->")
+        conn.send(pickle.dumps(filename))
+        address = pickle.loads(conn.recv(1024))
+        if ':' in address:
+            ip = address.split(":")[0]
+            port = int(address.split(":")[1])
+            conn.send(pickle.dumps("Name"))
+            hashcode = pickle.loads(conn.recv(1024))
+            if folder != "/":
+                folder = folder + '/' + filename
+            else:
+                folder = filename
+            download_file(ip, port, hashcode, destination, filename, folder)
+        else:
+            print(address)
+    else:
+        conn.send(pickle.dumps("Error"))
+    return
+
+
 # FTP EXECUTORS
 
 
-def upload_file(host, port, hashed_path, filename):  # Откуда запускаешь, оттуда и скачивает
+def upload_file(host, port, hashed_path, filename):
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
@@ -77,63 +139,67 @@ def client_nameserver():
     message = input(" -> ")
 
     while message.lower().strip() != 'exit':
-        client_socket.send(pickle.dumps(message))
-        data = get_data(client_socket)
-        if print_data(data):
-            if data == "IP:":   # TODO: rethink about protocol
-                                # TODO: handle if check_data returns False (not to fail execution)
-                client_socket.send(pickle.dumps("Waiting for IP"))
-                address = get_data(client_socket)
-                ip = address.split(":")[0]
-                port = int(address.split(":")[1])
-                print("Do you want to upload or download file?")
-                ans = input()
-                client_socket.send(pickle.dumps(ans))
-                confirmation = get_data(client_socket)
-                if confirmation == "Upload":
-                    print("Enter uploading path ( '/' is current): ")
-                    folder = input()
-                    if os.path.isdir(folder):
-                        print("Where to save in Storage?")
-                        destination = input()
-                        client_socket.send(pickle.dumps(destination))
-                        ans = get_data(client_socket)
-                        print(ans)
-                        if ans == "Enter the filename: ":
-                            filename = input()
-                            if folder != "/":
-                                path = folder + '/' + filename
-                            else:
-                                path = filename
-                            print(path)
-                            if os.path.isfile(path):
-                                print("File confirmed")
-                                client_socket.send(pickle.dumps(filename))
-                                hashed_path = get_data(client_socket)
-                                upload_file(ip, port, hashed_path, path)
-                                client_socket.send(pickle.dumps("Client uploaded"))
-                        else:
-                            print(ans)
-                            print(folder)
-                    else:
-                        print("No such directory")
-                        print(folder)
-                if confirmation == "Download":
-                    print("Enter from where to download path ( '/' is current): ")
-                    folder = input()
-                    if os.path.isdir(folder):
-                        client_socket.send(pickle.dumps(folder))
-                        ans = get_data(client_socket)
-                        print(ans)
-                        file = input()
-                        client_socket.send(pickle.dumps(file))
-                        hashed_path = get_data(client_socket)
-                        print("Where to save path:")
-                        save = input()
-                        download_file(ip, port, hashed_path, folder, file, save)
-                        client_socket.send(pickle.dumps("Client downloading"))
-                    else:
-                        print("No such directory")
+        if message == "Upload":
+            upload_script(client_socket)
+        elif message == "Download":
+            download_script(client_socket)
+        else:
+            client_socket.send(pickle.dumps(message))
+            data = get_data(client_socket)
+            print_data(data)
+                # if data == "Enter the path on host ('/' is current)":
+                #     folder = input("->")
+                #     client_socket.send(pickle.dumps(folder))
+                #     address = get_data(client_socket)
+                #     ip = address.split(":")[0]
+                #     port = int(address.split(":")[1])
+                #     print("Do you want to upload or download file?")
+                #     ans = input()
+                #     client_socket.send(pickle.dumps(ans))
+                #     confirmation = get_data(client_socket)
+                #     if confirmation == "Upload":
+                #         print("Enter uploading path ( '/' is current): ")
+                #         folder = input()
+                #         if os.path.isdir(folder):
+                #             destination = input()
+                #             client_socket.send(pickle.dumps(destination))
+                #             ans = get_data(client_socket)
+                #             print(ans)
+                #             if ans == "Enter the filename: ":
+                #                 filename = input()
+                #                 if folder != "/":
+                #                     path = folder + '/' + filename
+                #                 else:
+                #                     path = filename
+                #                 print(path)
+                #                 if os.path.isfile(path):
+                #                     print("File confirmed")
+                #                     client_socket.send(pickle.dumps(filename))
+                #                     hashed_path = get_data(client_socket)
+                #                     upload_file(ip, port, hashed_path, path)
+                #                     client_socket.send(pickle.dumps("Client uploaded"))
+                #             else:
+                #                 print(ans)
+                #                 print(folder)
+                #         else:
+                #             print("No such directory")
+                #             print(folder)
+                #     if confirmation == "Download":
+                #         print("Enter from where to download path ( '/' is current): ")
+                #         folder = input()
+                #         if os.path.isdir(folder):
+                #             client_socket.send(pickle.dumps(folder))
+                #             ans = get_data(client_socket)
+                #             print(ans)
+                #             file = input()
+                #             client_socket.send(pickle.dumps(file))
+                #             hashed_path = get_data(client_socket)
+                #             print("Where to save path:")
+                #             save = input()
+                #             download_file(ip, port, hashed_path, folder, file, save)
+                #             client_socket.send(pickle.dumps("Client downloading"))
+                #         else:
+                #             print("No such directory")
         message = input(" -> ")
 
     client_socket.close()

@@ -31,7 +31,7 @@ server_control = dict()     # format - hash : [IPs]
 
 messages = ["Initialize", "Create file", "Delete file", "File info", "Copy file", "Move file",
             "Open directory", "Read directory", "Make directory", "Delete directory",
-            "Connect", "Help", "Status"]
+            "Upload", "Download", "Help", "Status"]
 
 
 # HELPERS
@@ -584,6 +584,49 @@ def client_server():
                     save_dict(hash_table, "hash_table")
                 elif data == "Help":
                     get_help(conn)
+                elif data == "Download":
+                    msg = "Path"
+                    conn.send(pickle.dumps(msg))
+                    path = pickle.loads(conn.recv(1024))
+                    if path != "Error":
+                        msg = "Filename"
+                        conn.send(pickle.dumps(msg))
+                        filename = pickle.loads(conn.recv(1024))
+                        if path != "/":
+                            path = "/{}/".format(path)
+                        if file_structure.get(path) is None:
+                            conn.send(pickle.dumps("No target directory"))
+                        elif path_map.get("{}{}".format(path, filename)) is None:
+                            conn.send(pickle.dumps("File doesn't exist"))
+                        else:
+                            servs = server_control.get(calc_hash("{}{}".format(path, filename)))
+                            if servs is None:
+                                conn.send(pickle.dumps("Error"))
+                            else:
+                                ip = servs[0]
+                                conn.send(pickle.dumps("{}:{}".format(ip, ftp_port)))
+                                pickle.loads(conn.recv(1024))
+                                msg = calc_hash("{}{}".format(path, filename))
+                                conn.send(pickle.dumps(msg))
+                elif data == "Upload":
+                    msg = "Path"
+                    conn.send(pickle.dumps(msg))
+                    path = pickle.loads(conn.recv(1024))
+                    if path != "Error":
+                        msg = "Filename"
+                        conn.send(pickle.dumps(msg))
+                        filename = pickle.loads(conn.recv(1024))
+                        if path != "/":
+                            path = "/{}/".format(path)
+                        if file_structure.get(path) is None:
+                            conn.send(pickle.dumps("No target directory"))
+                        elif path_map.get("{}{}".format(path, filename)) is not None:
+                            conn.send(pickle.dumps("File already exist"))
+                        else:
+                            conn.send(pickle.dumps("{}:{}".format(servers[0], ftp_port)))
+                            pickle.loads(conn.recv(1024))
+                            msg = calc_hash("{}{}".format(path, filename))
+                            conn.send(pickle.dumps(msg))
                 elif data == "Connect":
                     # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
                     msg = "IP:"
