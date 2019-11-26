@@ -361,6 +361,10 @@ def move_file(conn):
         if filename in source_content:
             source_content.remove(filename)
             file_structure[source] = source_content
+            source_path_file = "{}{}".format(source, filename)
+            path_map.pop(source_path_file)
+            server_control.pop(calc_hash(source_path_file))
+            hash_table.pop(calc_hash(source_path_file))
     msg = "File moved successfully."
     conn.send(pickle.dumps(msg))
 
