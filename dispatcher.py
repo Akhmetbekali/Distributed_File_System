@@ -415,13 +415,13 @@ def listen_newcomer_ds():
             if len(servers) > 1:
                 send_message_to_ds(servers[0], "Backup", address[0])
         if data == "New file":
-            print("New file from " + address)
+            print("New file from " + str(address))
             conn.send(pickle.dumps("File"))
             hashcode = pickle.loads(conn.recv(1024))
-            print(hashcode)
+            print(str(hashcode))
             conn.send(pickle.dumps("Info"))
             file_info = pickle.loads(conn.recv(1024))
-            print(file_info)
+            print(str(file_info))
             file_containers = server_control.get(hashcode)
             if file_containers is None:
                 file_containers = [address[0]]
