@@ -70,6 +70,10 @@ def check_servers():
                 servers.remove(ip)
                 for ip in servers:
                     send_message_to_ds(ip, "Update DS", servers)
+                for file in server_control.keys():
+                    server_list = server_control.get(file)
+                    if ip in server_list:
+                        server_list.remove(ip)
         time.sleep(2)
 
 

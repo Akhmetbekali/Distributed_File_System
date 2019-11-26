@@ -98,15 +98,15 @@ def file_received_notify(file, ip):
 def start_ftp_server():
     if not os.path.isdir(homedir):
         os.mkdir(homedir)
-    if not os.path.isfile("{}/test.txt".format(homedir)):
-        f = open('{}/test.txt'.format(homedir), 'tw', encoding='utf-8')
+    if not os.path.isfile("{}/log.txt".format(homedir)):
+        f = open('{}/log.txt'.format(homedir), 'tw', encoding='utf-8')
         f.close()
     handler = MyFTPHandler
     authorizer = DummyAuthorizer()
     authorizer.add_user('user', '12345', homedir=homedir, perm='elradfmwMT')
     handler.authorizer = authorizer
 
-    logging.basicConfig(filename='{}/test.txt'.format(homedir), level=logging.INFO)
+    logging.basicConfig(filename='{}/log.txt'.format(homedir), level=logging.INFO)
     
     server = ThreadedFTPServer(('', ftp_port), handler)
 
