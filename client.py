@@ -2,12 +2,8 @@ import pickle
 import socket
 import os, os.path
 from ftplib import FTP
-import time
-import constants        # if highlighted - still don't care, it works
+import constants  # if highlighted - still don't care, it works
 
-# ds1_ip = constants.ds1_ip
-# ds2_ip = constants.ds2_ip
-# ds3_ip = constants.ds3_ip
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
@@ -154,59 +150,6 @@ def client_nameserver():
             client_socket.send(pickle.dumps(message))
             data = get_data(client_socket)
             print_data(data)
-                # if data == "Enter the path on host ('/' is current)":
-                #     folder = input("->")
-                #     client_socket.send(pickle.dumps(folder))
-                #     address = get_data(client_socket)
-                #     ip = address.split(":")[0]
-                #     port = int(address.split(":")[1])
-                #     print("Do you want to upload or download file?")
-                #     ans = input()
-                #     client_socket.send(pickle.dumps(ans))
-                #     confirmation = get_data(client_socket)
-                #     if confirmation == "Upload":
-                #         print("Enter uploading path ( '/' is current): ")
-                #         folder = input()
-                #         if os.path.isdir(folder):
-                #             destination = input()
-                #             client_socket.send(pickle.dumps(destination))
-                #             ans = get_data(client_socket)
-                #             print(ans)
-                #             if ans == "Enter the filename: ":
-                #                 filename = input()
-                #                 if folder != "/":
-                #                     path = folder + '/' + filename
-                #                 else:
-                #                     path = filename
-                #                 print(path)
-                #                 if os.path.isfile(path):
-                #                     print("File confirmed")
-                #                     client_socket.send(pickle.dumps(filename))
-                #                     hashed_path = get_data(client_socket)
-                #                     upload_file(ip, port, hashed_path, path)
-                #                     client_socket.send(pickle.dumps("Client uploaded"))
-                #             else:
-                #                 print(ans)
-                #                 print(folder)
-                #         else:
-                #             print("No such directory")
-                #             print(folder)
-                #     if confirmation == "Download":
-                #         print("Enter from where to download path ( '/' is current): ")
-                #         folder = input()
-                #         if os.path.isdir(folder):
-                #             client_socket.send(pickle.dumps(folder))
-                #             ans = get_data(client_socket)
-                #             print(ans)
-                #             file = input()
-                #             client_socket.send(pickle.dumps(file))
-                #             hashed_path = get_data(client_socket)
-                #             print("Where to save path:")
-                #             save = input()
-                #             download_file(ip, port, hashed_path, folder, file, save)
-                #             client_socket.send(pickle.dumps("Client downloading"))
-                #         else:
-                #             print("No such directory")
         message = input(" -> ")
 
     client_socket.close()

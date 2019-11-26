@@ -1,18 +1,12 @@
-import copy
 import hashlib
 import os
 import pickle
 import socket
-import shutil
 import time
 from threading import Thread
-from multiprocessing import Process
 
 import constants  # if highlighted - still don't care, it works
 
-# ds1_ip = constants.ds1_ip
-# ds2_ip = constants.ds2_ip
-# ds3_ip = constants.ds3_ip
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
 ftp_port = constants.ftp_port
@@ -27,7 +21,7 @@ file_structure = dict()  # format - path : list of directories and files inside
 current_folder = "/"  # string with the path of current folder
 path_map = dict()  # format - path/filename : [hashcode, file info]
 hash_table = dict()
-server_control = dict()     # format - hash : [IPs]
+server_control = dict()  # format - hash : [IPs]
 
 messages = ["Initialize", "Create file", "Delete file", "File info", "Copy file", "Move file",
             "Open directory", "Read directory", "Make directory", "Delete directory",
@@ -47,7 +41,7 @@ def load_dict(name):
         return pickle.load(f)
 
 
-def consid_file(path, filename):  # TODO write file info after Uploading and replication
+def consid_file(path, filename):
     hashcode = calc_hash("{}{}".format(path, filename))
     if path_map.get("{}{}".format(path, filename)) is None:
         path_map["{}{}".format(path, filename)] = [hashcode, None]
@@ -235,11 +229,6 @@ def mkfile(conn):
                     path_content.append(filename)
                     file_structure[current_folder] = path_content
                     consid_file(current_folder, filename)
-                # if server_control.get(calc_hash("{}{}".format(current_folder, filename))) is None:
-                #     server_control[calc_hash("{}{}".format(current_folder, filename))] = [ip]
-                # else:
-                #     ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
-                #     ips.append(ip)
             else:
                 msg = "Error: {}".format(status)
         conn.send(pickle.dumps("Successfully created " + filename))
@@ -295,14 +284,9 @@ def copy_file(conn):
     msg = "Copy file"
     for ip in servers:
         status = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
-                                                                      calc_hash("{}{}".format(destination, filename))))
+                                                            calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(destination, filename)
-            # if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
-            #     server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
-            # else:
-            #     ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
-            #     ips.append(ip)
         else:
             msg = "Error: {}".format(status)
         dest_content = file_structure[destination]
@@ -343,14 +327,9 @@ def move_file(conn):
     msg = "Move file"
     for ip in servers:
         status = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
-                                                                      calc_hash("{}{}".format(destination, filename))))
+                                                            calc_hash("{}{}".format(destination, filename))))
         if status == "Success":
             consid_file(destination, filename)
-            # if server_control.get(calc_hash("{}{}".format(destination, filename))) is None:
-            #     server_control[calc_hash("{}{}".format(destination, filename))] = [ip]
-            # else:
-            #     ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
-            #     ips.append(ip)
         else:
             msg = "Error: {}".format(status)
         dest_content = file_structure[destination]
@@ -388,9 +367,6 @@ def clear(conn):
 
 
 # INTERSERVER CONNECTIONS
-# TODO: refactor namings and check
-# TODO: listener of new data storages
-
 
 def listen_newcomer_ds():
     port = ds_ns_port
@@ -485,35 +461,6 @@ def send_message_to_ds(ip, message, content):
         print("Error")
         client_socket.close()
         return data
-
-
-# def get_response_on_new_file(path, filename):
-#     counter = 0
-#     working_servers = len(servers)
-#     while counter < working_servers:
-#         ds_ns = socket.socket()
-#         while True:
-#             try:
-#                 ds_ns.bind(('', ds_ns_port))
-#                 break
-#             except socket.error:
-#                 print("Connection Failed, Retrying..")
-#                 time.sleep(1)
-#         ds_ns.listen(2)
-#         ds_ns, address = ds_ns.accept()
-#         print("Connection from: " + str(address))
-#         info = pickle.loads(ds_ns.recv(1024))
-#         if path_map.get("{}{}".format(path, filename)) is None:
-#             consid_file(path, filename)
-#             print(path_map)
-#         if server_control.get(calc_hash("{}{}".format(path, filename))) is None:
-#             server_control[calc_hash("{}{}".format(path, filename))] = [address[0]]
-#         else:
-#             ips = server_control.get(calc_hash("{}{}".foconsidrmat(path, filename)))
-#             ips.append(address[0])
-#         print(server_control)
-#         ds_ns.close()
-#         counter += 1
 
 
 def client_server():
@@ -624,52 +571,6 @@ def client_server():
                             path_content = file_structure.get(path)
                             path_content.append(filename)
                             consid_file(path, filename)
-                # elif data == "Connect":
-                #     # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
-                #     msg = "IP:"
-                #     conn.send(pickle.dumps(msg))
-                #     pickle.loads(conn.recv(1024))
-                #     ip_id = 0
-                #     msg = "{}:{}".format(servers[ip_id], ftp_port)
-                #     conn.send(pickle.dumps(msg))
-                #     command = pickle.loads(conn.recv(1024))
-                #     conn.send(pickle.dumps(command))
-                #     directory = pickle.loads(conn.recv(1024))
-                #     print(directory)
-                #
-                #     if directory != "/":
-                #         directory = "/{}/".format(directory)
-                #     if file_structure.get(directory) is not None:
-                #         msg = "Enter the filename: "
-                #         conn.send(pickle.dumps(msg))
-                #         filename = pickle.loads(conn.recv(1024))
-                #         print(filename)
-                #
-                #         path = "{}{}".format(directory, filename)
-                #         if command == "Upload":
-                #             if path_map.get(path) is not None:
-                #                 conn.send(pickle.dumps("File already exists"))
-                #             else:
-                #                 hashed_path = calc_hash(path)
-                #                 conn.send(pickle.dumps(hashed_path))
-                #                 print("Waiting for connection from DS")
-                #                 status = pickle.loads(conn.recv(1024))
-                #                 print(status)
-                #                 path_content = file_structure.get(directory)
-                #                 print(path_content)
-                #                 if path_content is None:
-                #                     print("Error")
-                #                 if filename not in path_content:
-                #                     print("Adding new file")
-                #                     path_content.append(filename)
-                #                     file_structure[directory] = path_content
-                #                     print(file_structure)
-                #         if command == "Download":
-                #             hashed_path = calc_hash(path)
-                #             conn.send(pickle.dumps(hashed_path))
-                #     else:
-                #         conn.send(pickle.dumps("No such directory"))
-                #         print(directory)
             else:
                 data = "No such command"
                 conn.send(pickle.dumps(data))

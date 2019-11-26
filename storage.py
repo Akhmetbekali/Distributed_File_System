@@ -10,11 +10,8 @@ from ftplib import FTP
 import socket
 import pickle
 import os
-import constants        # if highlighted - still don't care, it works
+import constants  # if highlighted - still don't care, it works
 
-# ds1_ip = constants.ds1_ip
-# ds2_ip = constants.ds2_ip
-# ds3_ip = constants.ds3_ip
 ds = []
 ns_ip = constants.ns_ip
 client_ip = constants.client_ip
@@ -53,7 +50,6 @@ class MyFTPHandler(FTPHandler):
                         new_rep.start()
                     new_rep.join()
                     time.sleep(2)
-        # file_info_met(file, ns_ip)
         send_file_info = Thread(target=file_received_notify, args=(file, ns_ip))
         if send_file_info.isAlive() is False:
             send_file_info.start()
@@ -107,7 +103,7 @@ def start_ftp_server():
     handler.authorizer = authorizer
 
     logging.basicConfig(filename='{}/log.txt'.format(homedir), level=logging.INFO)
-    
+
     server = ThreadedFTPServer(('', ftp_port), handler)
 
     server.max_cons_per_ip = 5
