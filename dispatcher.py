@@ -180,6 +180,7 @@ def remove_file(name, path):
                 file_structure[path] = path_content
                 path_map.pop("{}{}".format(path, name))
                 hash_table.pop(calc_hash("{}{}".format(path, name)))
+                server_control.pop(calc_hash("{}{}".format(path, name)))
         else:
             success = False
         if success:
