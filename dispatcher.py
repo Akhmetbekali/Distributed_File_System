@@ -412,7 +412,7 @@ def listen_newcomer_ds():
                 server_control[hashcode] = file_containers
             else:
                 file_containers.append(address[0])
-            pt_map = copy.copy(path_map.values())
+            pt_map = path_map.values()
             for file in pt_map:
                 if file[0] == str(hashcode):
                     if file[1] is None:
