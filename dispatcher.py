@@ -468,7 +468,6 @@ def send_message_to_ds(ip, message, content):
         response = pickle.loads(client_socket.recv(1024))
         while response != "Finish Backup":
             client_socket.send(pickle.dumps("Received"))
-            file_servers = server_control.get(response)
             response = pickle.loads(client_socket.recv(1024))
 
             save_dict(file_structure, "file_structure")
@@ -623,6 +622,7 @@ def client_server():
                             pickle.loads(conn.recv(1024))
                             msg = calc_hash("{}{}".format(path, filename))
                             conn.send(pickle.dumps(msg))
+                            consid_file(path, filename)
                 # elif data == "Connect":
                 #     # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
                 #     msg = "IP:"
