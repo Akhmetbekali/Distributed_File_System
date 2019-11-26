@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import os
 import pickle
@@ -403,11 +404,9 @@ def listen_newcomer_ds():
             conn.send(pickle.dumps("File"))
             hashcode = pickle.loads(conn.recv(1024))
             hashcode = hashcode.split("/")[-1]
-            print(str(hashcode))
             conn.send(pickle.dumps("Info"))
             file_info = pickle.loads(conn.recv(1024))
-            print(str(file_info))
-            file_containers = server_control.get(hashcode)
+            file_containers = copy.copy(server_control.get(hashcode))
             if file_containers is None:
                 file_containers = [address[0]]
                 server_control[hashcode] = file_containers
