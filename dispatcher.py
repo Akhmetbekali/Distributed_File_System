@@ -369,7 +369,7 @@ def clear(conn):
     msg = "Initialize"
     ip_id = 0
     response = send_message_to_ds(servers[ip_id], msg, "")
-    if response == "Clear":
+    if response == "Server started":
         msg = "Cleared"
         conn.send(pickle.dumps(msg))
 
