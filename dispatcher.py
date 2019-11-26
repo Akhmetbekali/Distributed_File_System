@@ -452,12 +452,12 @@ def send_message_to_ds(ip, message, content):
         client_socket.send(pickle.dumps(content))
         response = pickle.loads(client_socket.recv(1024))
         while response != "Finish Backup":
+            client_socket.send(pickle.dumps("Received"))
             file_servers = server_control.get(response)
             if file_servers is not None:
                 file_servers.append(content)
             else:
                 server_control[response] = [content]
-            client_socket.send(pickle.dumps("Received"))
             # response = pickle.loads(client_socket.recv(1024))
     elif data in simple_response:
         return data

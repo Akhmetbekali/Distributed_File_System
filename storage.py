@@ -192,10 +192,7 @@ def backup_files(conn, ip):
         if not '.' in file:
             start_replication("{}/{}".format(homedir, file), ip)
             conn.send(pickle.dumps(file))
-            data = pickle.loads(conn.recv(1024))
-            if data != "Received":
-                return
-    return
+            pickle.loads(conn.recv(1024))
 
 
 # INTERSERVER COMMUNICATION
