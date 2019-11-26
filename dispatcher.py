@@ -31,7 +31,7 @@ server_control = dict()     # format - hash : [IPs]
 
 messages = ["Initialize", "Create file", "Delete file", "File info", "Copy file", "Move file",
             "Open directory", "Read directory", "Make directory", "Delete directory",
-            "Connect", "Help"]
+            "Connect", "Help", "Status"]
 
 
 # HELPERS
@@ -109,6 +109,15 @@ def mkdir(conn):
         msg = "Successfully created"
         print(file_structure)
         conn.send(pickle.dumps(msg))
+
+
+def status(conn):
+    print("File structure: " + str(file_structure))
+    print("Servers: " + str(servers))
+    print("Server control: " + str(server_control))
+    print("Path map: " + str(path_map))
+    print("Hash table: " + str(hash_table))
+    conn.send(pickle.dumps("Success"))
 
 
 def rmdir(conn):
@@ -552,6 +561,8 @@ def client_server():
                     save_dict(hash_table, "hash_table")
                 elif data == "File info":
                     file_info(conn)
+                elif data == "Status":
+                    status(conn)
                 elif data == "Copy file":
                     copy_file(conn)
                     save_dict(file_structure, "file_structure")
