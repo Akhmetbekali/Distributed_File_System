@@ -406,14 +406,14 @@ def listen_newcomer_ds():
             hashcode = hashcode.split("/")[-1]
             conn.send(pickle.dumps("Info"))
             file_info = pickle.loads(conn.recv(1024))
-            file_containers = copy.copy(server_control.get(hashcode))
+            file_containers = server_control.get(hashcode)
             if file_containers is None:
                 file_containers = [address[0]]
                 server_control[hashcode] = file_containers
             else:
                 file_containers.append(address[0])
-            for file in path_map.values():
-                print(str(file[0] == hashcode))
+            pt_map = copy.copy(path_map.values())
+            for file in pt_map:
                 if file[0] == str(hashcode):
                     if file[1] is None:
                         file[1] = file_info
