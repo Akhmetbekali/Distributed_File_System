@@ -74,7 +74,7 @@ def get_my_ip():
 
 
 def file_received_notify(file, ip):
-    print("Creating connection DS -> NS")
+    print("Notify about new file")
     while True:
         try:  # moved this line here
             ds_ns = socket.socket()
@@ -83,7 +83,6 @@ def file_received_notify(file, ip):
         except socket.error:
             print("Connection Failed, Retrying..")
             time.sleep(1)
-    print("Connected to " + ip)
     ds_ns.send(pickle.dumps("New file"))
     pickle.loads(ds_ns.recv(1024))
     ds_ns.send(pickle.dumps(file))
@@ -91,7 +90,6 @@ def file_received_notify(file, ip):
     message = os.stat(file)
     ds_ns.send(pickle.dumps(message))
     ds_ns.close()
-    print("Disconnected from " + ip)
 
 
 # INSTRUCTION EXECUTORS
@@ -154,7 +152,7 @@ def delete_file(file):
     if os.path.isfile(path):
         os.remove(path)
         msg = "Deleted"
-        print(msg)
+        print("{} {}".format(msg, file))
         return msg
     else:
         msg = "No such file"
@@ -216,7 +214,6 @@ def instruction_listener(port):
     global ds
     while True:
         conn, address = server_socket.accept()
-        print("Connection from: " + str(address))
 
         data = pickle.loads(conn.recv(1024))
 

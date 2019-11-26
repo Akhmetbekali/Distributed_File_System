@@ -148,12 +148,9 @@ def remove_dir(dir):
     for elem in reversed(path_content):
         path = "{}{}/".format(dir, elem)
         if file_structure.get(path) is not None:
-            print(elem + " is a directory")
             remove_dir(path)
         else:
-            print(elem + " is a file")
             remove_file(elem, dir)
-    print("Delete " + str(dir))
     file_structure.pop(dir)
 
 
@@ -192,7 +189,6 @@ def remove_file(name, path):
 def readdir(conn):
     dir = current_folder
     if file_structure.get(dir) is not None:
-        print(file_structure)
         path_content = file_structure.get(dir)
         if len(path_content) == 0:
             conn.send(pickle.dumps("Empty directory"))
@@ -201,7 +197,6 @@ def readdir(conn):
             conn.send(data)
     else:
         err = "No such file or directory: " + dir
-        print(file_structure)
         conn.send(pickle.dumps(err))
 
 
@@ -397,11 +392,10 @@ def listen_newcomer_ds():
 
     while True:
         conn, address = server.accept()
-        print("Connection from: " + str(address))
 
         data = pickle.loads(conn.recv(1024))
         if data == "New":
-
+            print("New server: " + address[0])
             servers.append(address[0])
             conn.send(pickle.dumps(servers))
             for ip in servers:
@@ -427,7 +421,6 @@ def listen_newcomer_ds():
                 if file[0] == str(hashcode):
                     if file[1] is None:
                         file[1] = file_info
-                        print(path_map)
         else:
             conn.send(pickle.dumps("Error"))
         conn.close()
@@ -436,7 +429,6 @@ def listen_newcomer_ds():
         save_dict(path_map, "path_map")
         save_dict(server_control, "server_control")
         save_dict(hash_table, "hash_table")
-        print("Connection closed: " + str(address))
 
 
 def send_message_to_ds(ip, message, content):
@@ -528,7 +520,6 @@ def client_server():
 
         while True:
             data = conn.recv(1024)
-            print(servers)
             if not data:
                 break
             data = pickle.loads(data)
