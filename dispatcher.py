@@ -458,7 +458,7 @@ def send_message_to_ds(ip, message, content):
                 file_servers.append(content)
             else:
                 server_control[response] = [content]
-            # response = pickle.loads(client_socket.recv(1024))
+            response = pickle.loads(client_socket.recv(1024))
     elif data in simple_response:
         return data
     else:
