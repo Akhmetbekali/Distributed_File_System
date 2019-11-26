@@ -48,25 +48,31 @@ def upload_script(conn):
     if os.path.isdir(folder):
         print("Enter destination path on Storage: ")
         destination = input("->")
-        conn.send(pickle.dumps(destination))
-        pickle.loads(conn.recv(1024))
         print("Enter filename: ")
         filename = input("->")
-        conn.send(pickle.dumps(filename))
-        address = pickle.loads(conn.recv(1024))
-        if ':' in address:
-            ip = address.split(":")[0]
-            port = int(address.split(":")[1])
-            conn.send(pickle.dumps("Name"))
-            hashcode = pickle.loads(conn.recv(1024))
-            if folder != "/":
-                folder = folder + '/' + filename
-            else:
-                folder = filename
-            upload_file(ip, port, hashcode, folder)
+        if folder != "/":
+            path = folder + '/' + filename
         else:
-            print(address)
+            path = filename
+        if os.path.isfile(path):
+            conn.send(pickle.dumps(destination))
+            pickle.loads(conn.recv(1024))
+            conn.send(pickle.dumps(filename))
+            address = pickle.loads(conn.recv(1024))
+            if ':' in address:
+                ip = address.split(":")[0]
+                port = int(address.split(":")[1])
+                conn.send(pickle.dumps("Name"))
+                hashcode = pickle.loads(conn.recv(1024))
+
+                upload_file(ip, port, hashcode, path)
+            else:
+                print(address)
+        else:
+            print("No such file")
+            conn.send(pickle.dumps("No such file"))
     else:
+        print("No such directory")
         conn.send(pickle.dumps("Error"))
     return
 

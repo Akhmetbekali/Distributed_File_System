@@ -469,10 +469,6 @@ def send_message_to_ds(ip, message, content):
         while response != "Finish Backup":
             client_socket.send(pickle.dumps("Received"))
             file_servers = server_control.get(response)
-            if file_servers is not None:
-                file_servers.append(content)
-            else:
-                server_control[response] = [content]
             response = pickle.loads(client_socket.recv(1024))
 
             save_dict(file_structure, "file_structure")
@@ -627,52 +623,52 @@ def client_server():
                             pickle.loads(conn.recv(1024))
                             msg = calc_hash("{}{}".format(path, filename))
                             conn.send(pickle.dumps(msg))
-                elif data == "Connect":
-                    # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
-                    msg = "IP:"
-                    conn.send(pickle.dumps(msg))
-                    pickle.loads(conn.recv(1024))
-                    ip_id = 0
-                    msg = "{}:{}".format(servers[ip_id], ftp_port)
-                    conn.send(pickle.dumps(msg))
-                    command = pickle.loads(conn.recv(1024))
-                    conn.send(pickle.dumps(command))
-                    directory = pickle.loads(conn.recv(1024))
-                    print(directory)
-
-                    if directory != "/":
-                        directory = "/{}/".format(directory)
-                    if file_structure.get(directory) is not None:
-                        msg = "Enter the filename: "
-                        conn.send(pickle.dumps(msg))
-                        filename = pickle.loads(conn.recv(1024))
-                        print(filename)
-
-                        path = "{}{}".format(directory, filename)
-                        if command == "Upload":
-                            if path_map.get(path) is not None:
-                                conn.send(pickle.dumps("File already exists"))
-                            else:
-                                hashed_path = calc_hash(path)
-                                conn.send(pickle.dumps(hashed_path))
-                                print("Waiting for connection from DS")
-                                status = pickle.loads(conn.recv(1024))
-                                print(status)
-                                path_content = file_structure.get(directory)
-                                print(path_content)
-                                if path_content is None:
-                                    print("Error")
-                                if filename not in path_content:
-                                    print("Adding new file")
-                                    path_content.append(filename)
-                                    file_structure[directory] = path_content
-                                    print(file_structure)
-                        if command == "Download":
-                            hashed_path = calc_hash(path)
-                            conn.send(pickle.dumps(hashed_path))
-                    else:
-                        conn.send(pickle.dumps("No such directory"))
-                        print(directory)
+                # elif data == "Connect":
+                #     # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
+                #     msg = "IP:"
+                #     conn.send(pickle.dumps(msg))
+                #     pickle.loads(conn.recv(1024))
+                #     ip_id = 0
+                #     msg = "{}:{}".format(servers[ip_id], ftp_port)
+                #     conn.send(pickle.dumps(msg))
+                #     command = pickle.loads(conn.recv(1024))
+                #     conn.send(pickle.dumps(command))
+                #     directory = pickle.loads(conn.recv(1024))
+                #     print(directory)
+                #
+                #     if directory != "/":
+                #         directory = "/{}/".format(directory)
+                #     if file_structure.get(directory) is not None:
+                #         msg = "Enter the filename: "
+                #         conn.send(pickle.dumps(msg))
+                #         filename = pickle.loads(conn.recv(1024))
+                #         print(filename)
+                #
+                #         path = "{}{}".format(directory, filename)
+                #         if command == "Upload":
+                #             if path_map.get(path) is not None:
+                #                 conn.send(pickle.dumps("File already exists"))
+                #             else:
+                #                 hashed_path = calc_hash(path)
+                #                 conn.send(pickle.dumps(hashed_path))
+                #                 print("Waiting for connection from DS")
+                #                 status = pickle.loads(conn.recv(1024))
+                #                 print(status)
+                #                 path_content = file_structure.get(directory)
+                #                 print(path_content)
+                #                 if path_content is None:
+                #                     print("Error")
+                #                 if filename not in path_content:
+                #                     print("Adding new file")
+                #                     path_content.append(filename)
+                #                     file_structure[directory] = path_content
+                #                     print(file_structure)
+                #         if command == "Download":
+                #             hashed_path = calc_hash(path)
+                #             conn.send(pickle.dumps(hashed_path))
+                #     else:
+                #         conn.send(pickle.dumps("No such directory"))
+                #         print(directory)
             else:
                 data = "No such command"
                 conn.send(pickle.dumps(data))
