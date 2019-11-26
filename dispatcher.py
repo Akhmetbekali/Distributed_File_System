@@ -30,7 +30,7 @@ server_control = dict()     # format - hash : [IPs]
 
 messages = ["Initialize", "Create file", "Delete file", "File info", "Copy file", "Move file",
             "Open directory", "Read directory", "Make directory", "Delete directory",
-            "Connect", "Clear", "Help"]
+            "Connect", "Help"]
 
 
 # HELPERS
@@ -147,7 +147,7 @@ def remove_dir(dir):
     file_structure.pop(dir)
 
 
-def remove_file(name, path):    # TODO: check response values
+def remove_file(name, path):
     path_content = file_structure.get(path)
     if name not in path_content:
         msg = "No such file"
@@ -158,11 +158,11 @@ def remove_file(name, path):    # TODO: check response values
     else:
         msg = "Delete file"
         success = True
-        response = None
         servers_with_file = server_control.get(calc_hash("{}{}".format(current_folder, name)))
         for ip in servers_with_file:
-            status, response = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, name)))
+            status = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, name)))
             if status != "Success":
+                servers_with_file.remove(ip)
                 success = False
         if success:
             if name in path_content:
@@ -170,18 +170,12 @@ def remove_file(name, path):    # TODO: check response values
                 file_structure[current_folder] = path_content
                 path_map.pop("{}{}".format(path, name))
                 hash_table.pop(calc_hash("{}{}".format(path, name)))
-            if server_control.get(calc_hash("{}{}".format(current_folder, name))) is None:
-                response = "Error: no DS contain file"
-            else:
-                ips = server_control.get(calc_hash("{}{}".format(current_folder, name)))
-                if ip in ips:
-                    ips.remove(ip)
         else:
-            msg = "Error: {}".format(response)
-            response = msg
             success = False
         if success:
-            return
+            return "Success"
+        else:
+            return "Error"
 
 
 def readdir(conn):
@@ -237,13 +231,14 @@ def mkfile(conn):
                 else:
                     ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
                     ips.append(ip)
+                conn.send("Successfully created " + filename)
             else:
                 msg = "Error: {}".format(status)
                 if counter < 2:
                     conn.send(pickle.dumps(msg))
 
 
-def rmfile(conn):  # TODO in DS recreate file
+def rmfile(conn):
     conn.send(pickle.dumps("\nEnter the name of file"))
     name = pickle.loads(conn.recv(1024))
     msg = remove_file(name, current_folder)
@@ -291,7 +286,6 @@ def copy_file(conn):
         conn.send(pickle.dumps(msg))
         return
     msg = "Copy file"
-    counter = 0
     for ip in servers:
         status = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                       calc_hash("{}{}".format(destination, filename))))
@@ -302,8 +296,6 @@ def copy_file(conn):
             else:
                 ips = server_control.get(calc_hash("{}{}".format(destination, filename)))
                 ips.append(ip)
-            # if counter < 2:
-            #     conn.send(pickle.dumps(response))
         else:
             msg = "Error: {}".format(status)
         dest_content = file_structure[destination]
@@ -342,7 +334,6 @@ def move_file(conn):
         conn.send(pickle.dumps(msg))
         return
     msg = "Move file"
-    counter = 0
     for ip in servers:
         status = send_message_to_ds(ip, msg, "{} {}".format(calc_hash("{}{}".format(source, filename)),
                                                                       calc_hash("{}{}".format(destination, filename))))
@@ -444,7 +435,7 @@ def listen_newcomer_ds():
 
 
 def send_message_to_ds(ip, message, content):
-    simple_response = ["Clear", "Check", "Server started"]
+    simple_response = ["Check", "Server started"]
     content_response = ["Ready", "Update"]
     host = ip
     port = ns_ds_port
