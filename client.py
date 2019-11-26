@@ -83,9 +83,9 @@ def download_script(conn):
     print("Enter destination path on host ( '/' is current): ")
     folder = input("->")
     print("Enter path on Storage: ")
-    destination = input("->")
+    source = input("->")
     if os.path.isdir(folder):
-        conn.send(pickle.dumps(destination))
+        conn.send(pickle.dumps(source))
         pickle.loads(conn.recv(1024))
         print("Enter filename: ")
         filename = input("->")
@@ -100,8 +100,8 @@ def download_script(conn):
                 folder = folder + '/'
             else:
                 folder = "/"
-            print(hashcode, destination, filename, folder)
-            download_file(ip, port, hashcode, destination, filename, folder)
+            print(hashcode, source, filename, folder)
+            download_file(ip, port, hashcode, source, filename, folder)
         else:
             print(address)
     else:
@@ -127,7 +127,7 @@ def download_file(host, port, hashed_path, folder, filename, save):
     ftp = FTP()
     ftp.connect(host, port)
     ftp.login("user", "12345")
-    ftp.cwd(folder)
+    # ftp.cwd(folder)
     save_path = save + '/' + filename
     localfile = open(save_path, 'wb')
     ftp.retrbinary('RETR ' + hashed_path, localfile.write, 1024)
