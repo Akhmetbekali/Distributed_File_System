@@ -622,6 +622,8 @@ def client_server():
                             pickle.loads(conn.recv(1024))
                             msg = calc_hash("{}{}".format(path, filename))
                             conn.send(pickle.dumps(msg))
+                            path_content = file_structure.get(path)
+                            path_content.append(filename)
                             consid_file(path, filename)
                 # elif data == "Connect":
                 #     # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
