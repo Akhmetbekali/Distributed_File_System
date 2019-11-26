@@ -73,13 +73,19 @@ def check_servers():
 
 
 def init():
+    global file_structure
+    global server_control
+    global path_map
+    global hash_table
     if os.path.isdir("dict"):
         if os.path.isfile("dict/file_structure.pkl"):
-            load_dict("file_structure")
+            file_structure = load_dict("file_structure")
         if os.path.isfile("dict/server_control.pkl"):
-            load_dict("server_control")
+            server_control = load_dict("server_control")
         if os.path.isfile("dict/path_map.pkl"):
-            load_dict("path_map")
+            path_map = load_dict("path_map")
+        if os.path.isfile("dict/hash_table.pkl"):
+            hash_table = load_dict("hash_table")
     else:
         os.mkdir("dict")
         file_structure.update({'/': []})
@@ -426,6 +432,11 @@ def listen_newcomer_ds():
         else:
             conn.send(pickle.dumps("Error"))
         conn.close()
+
+        save_dict(file_structure, "file_structure")
+        save_dict(path_map, "path_map")
+        save_dict(server_control, "server_control")
+        save_dict(hash_table, "hash_table")
         print("Connection closed: " + str(address))
 
 
@@ -447,6 +458,11 @@ def send_message_to_ds(ip, message, content):
         client_socket.send(pickle.dumps(content))
         pickle.loads(client_socket.recv(1024))
         client_socket.close()
+
+        save_dict(file_structure, "file_structure")
+        save_dict(path_map, "path_map")
+        save_dict(server_control, "server_control")
+        save_dict(hash_table, "hash_table")
         return "Success"
     elif data == "Backup":
         client_socket.send(pickle.dumps(content))
@@ -459,7 +475,17 @@ def send_message_to_ds(ip, message, content):
             else:
                 server_control[response] = [content]
             response = pickle.loads(client_socket.recv(1024))
+
+            save_dict(file_structure, "file_structure")
+            save_dict(path_map, "path_map")
+            save_dict(server_control, "server_control")
+            save_dict(hash_table, "hash_table")
     elif data in simple_response:
+
+        save_dict(file_structure, "file_structure")
+        save_dict(path_map, "path_map")
+        save_dict(server_control, "server_control")
+        save_dict(hash_table, "hash_table")
         return data
     else:
         print("Error")
@@ -528,11 +554,13 @@ def client_server():
                     save_dict(file_structure, "file_structure")
                     save_dict(path_map, "path_map")
                     save_dict(server_control, "server_control")
+                    save_dict(hash_table, "hash_table")
                 elif data == "Delete file":
                     rmfile(conn)
                     save_dict(file_structure, "file_structure")
                     save_dict(path_map, "path_map")
                     save_dict(server_control, "server_control")
+                    save_dict(hash_table, "hash_table")
                 elif data == "File info":
                     file_info(conn)
                 elif data == "Copy file":
@@ -540,11 +568,13 @@ def client_server():
                     save_dict(file_structure, "file_structure")
                     save_dict(path_map, "path_map")
                     save_dict(server_control, "server_control")
+                    save_dict(hash_table, "hash_table")
                 elif data == "Move file":
                     move_file(conn)
                     save_dict(file_structure, "file_structure")
                     save_dict(path_map, "path_map")
                     save_dict(server_control, "server_control")
+                    save_dict(hash_table, "hash_table")
                 elif data == "Initialize":
                     initialize(conn)
                 elif data == "Help":
@@ -554,6 +584,7 @@ def client_server():
                     save_dict(file_structure, "file_structure")
                     save_dict(path_map, "path_map")
                     save_dict(server_control, "server_control")
+                    save_dict(hash_table, "hash_table")
                 elif data == "Connect":
                     # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
                     msg = "IP:"
