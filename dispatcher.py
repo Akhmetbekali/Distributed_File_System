@@ -406,6 +406,7 @@ def listen_newcomer_ds():
             print("New file from " + str(address))
             conn.send(pickle.dumps("File"))
             hashcode = pickle.loads(conn.recv(1024))
+            hashcode = hashcode.split("/")[-1]
             print(str(hashcode))
             conn.send(pickle.dumps("Info"))
             file_info = pickle.loads(conn.recv(1024))
