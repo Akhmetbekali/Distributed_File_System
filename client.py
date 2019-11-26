@@ -97,9 +97,9 @@ def download_script(conn):
             conn.send(pickle.dumps("Name"))
             hashcode = pickle.loads(conn.recv(1024))
             if folder != "/":
-                folder = folder + '/' + filename
+                folder = folder + '/'
             else:
-                folder = filename
+                folder = "/"
             download_file(ip, port, hashcode, destination, filename, folder)
         else:
             print(address)
