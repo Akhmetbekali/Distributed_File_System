@@ -578,7 +578,17 @@ def client_server():
         conn.close()
 
 
+def get_my_ip():
+    try:
+        host_name = socket.gethostname()
+        host_ip = socket.gethostbyname(host_name)
+        return host_ip
+    except:
+        print("Unable to get Hostname and IP")
+        return 0
+
 if __name__ == '__main__':
+    print(get_my_ip())
     init()
     new_ds_checker = Thread(target=listen_newcomer_ds, daemon=True)
     new_ds_checker.start()
