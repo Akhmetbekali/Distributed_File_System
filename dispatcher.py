@@ -235,11 +235,11 @@ def mkfile(conn):
                     path_content.append(filename)
                     file_structure[current_folder] = path_content
                     consid_file(current_folder, filename)
-                if server_control.get(calc_hash("{}{}".format(current_folder, filename))) is None:
-                    server_control[calc_hash("{}{}".format(current_folder, filename))] = [ip]
-                else:
-                    ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
-                    ips.append(ip)
+                # if server_control.get(calc_hash("{}{}".format(current_folder, filename))) is None:
+                #     server_control[calc_hash("{}{}".format(current_folder, filename))] = [ip]
+                # else:
+                #     ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
+                #     ips.append(ip)
             else:
                 msg = "Error: {}".format(status)
         conn.send(pickle.dumps("Successfully created " + filename))
@@ -419,7 +419,7 @@ def listen_newcomer_ds():
             if file_containers is None:
                 file_containers = [address[0]]
                 server_control[hashcode] = file_containers
-            else:
+            elif address[0] not in file_containers:
                 file_containers.append(address[0])
             pt_map = path_map.values()
             for file in pt_map:
