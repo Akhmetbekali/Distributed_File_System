@@ -231,7 +231,7 @@ def mkfile(conn):
                 else:
                     ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
                     ips.append(ip)
-                conn.send("Successfully created " + filename)
+                conn.send(pickle.dumps("Successfully created " + filename))
             else:
                 msg = "Error: {}".format(status)
                 if counter < 2:
