@@ -69,7 +69,7 @@ def check_servers():
                 servers.remove(ip)
                 for ip in servers:
                     send_message_to_ds(ip, "Update DS", servers)
-        time.sleep(10)
+        time.sleep(2)
 
 
 def init():
@@ -143,7 +143,7 @@ def remove_dir(dir):
         else:
             print(elem + " is a file")
             remove_file(elem, dir)
-    print("Delete " + dir)
+    print("Delete " + str(dir))
     file_structure.pop(dir)
 
 
@@ -355,12 +355,6 @@ def move_file(conn):
     conn.send(pickle.dumps(msg))
 
 
-def initialize(conn):
-    ip_id = 0
-    msg = send_message_to_ds(servers[ip_id], "Initialize", "")
-    conn.send(pickle.dumps(msg))
-
-
 def get_help(conn):
     conn.send(pickle.dumps(messages))
 
@@ -369,7 +363,9 @@ def clear(conn):
     file_structure.clear()
     file_structure["/"] = []
     path_map.clear()
-    msg = "Clear"
+    server_control.clear()
+    hash_table.clear()
+    msg = "Initialize"
     ip_id = 0
     response = send_message_to_ds(servers[ip_id], msg, "")
     if response == "Clear":
@@ -570,15 +566,13 @@ def client_server():
                     save_dict(server_control, "server_control")
                     save_dict(hash_table, "hash_table")
                 elif data == "Initialize":
-                    initialize(conn)
-                elif data == "Help":
-                    get_help(conn)
-                elif data == "Clear":
                     clear(conn)
                     save_dict(file_structure, "file_structure")
                     save_dict(path_map, "path_map")
                     save_dict(server_control, "server_control")
                     save_dict(hash_table, "hash_table")
+                elif data == "Help":
+                    get_help(conn)
                 elif data == "Connect":
                     # TODO: get rid of "Connect", accept "Upload" & "Download", provide IP on the last
                     msg = "IP:"
