@@ -418,7 +418,7 @@ def listen_newcomer_ds():
             else:
                 file_containers.append(address[0])
             for file in path_map.values():
-                print(file[0] + " " + hashcode)
+                print(str(file[0] == hashcode))
                 if file[0] == str(hashcode):
                     if file[1] is not None:
                         file[1] = file_info
