@@ -420,7 +420,7 @@ def listen_newcomer_ds():
             for file in path_map.values():
                 print(str(file[0] == hashcode))
                 if file[0] == str(hashcode):
-                    if file[1] is not None:
+                    if file[1] is None:
                         file[1] = file_info
                         print(path_map)
         else:
