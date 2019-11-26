@@ -168,16 +168,16 @@ def remove_file(name, path):
     else:
         msg = "Delete file"
         success = True
-        servers_with_file = server_control.get(calc_hash("{}{}".format(current_folder, name)))
+        servers_with_file = server_control.get(calc_hash("{}{}".format(path, name)))
         for ip in servers_with_file:
-            status = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, name)))
+            status = send_message_to_ds(ip, msg, calc_hash("{}{}".format(path, name)))
             if status != "Success":
                 servers_with_file.remove(ip)
                 success = False
         if success:
             if name in path_content:
                 path_content.remove(name)
-                file_structure[current_folder] = path_content
+                file_structure[path] = path_content
                 path_map.pop("{}{}".format(path, name))
                 hash_table.pop(calc_hash("{}{}".format(path, name)))
         else:
