@@ -67,6 +67,8 @@ def check_servers():
             if response != "Check":
                 print(hostname, 'is down!')
                 servers.remove(ip)
+                for ip in servers:
+                    send_message_to_ds(ip, "Update DS", servers)
         time.sleep(10)
 
 
