@@ -218,7 +218,6 @@ def mkfile(conn):
         conn.send(pickle.dumps(msg))
     else:
         msg = "Create file"
-        counter = 0
         for ip in servers:
             status = send_message_to_ds(ip, msg, calc_hash("{}{}".format(current_folder, filename)))
             if status == "Success":
@@ -231,11 +230,9 @@ def mkfile(conn):
                 else:
                     ips = server_control.get(calc_hash("{}{}".format(current_folder, filename)))
                     ips.append(ip)
-                conn.send(pickle.dumps("Successfully created " + filename))
             else:
                 msg = "Error: {}".format(status)
-                if counter < 2:
-                    conn.send(pickle.dumps(msg))
+        conn.send(pickle.dumps("Successfully created " + filename))
 
 
 def rmfile(conn):
