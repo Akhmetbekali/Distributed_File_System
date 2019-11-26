@@ -100,6 +100,7 @@ def download_script(conn):
                 folder = folder + '/'
             else:
                 folder = "/"
+            print(hashcode, destination, filename, folder)
             download_file(ip, port, hashcode, destination, filename, folder)
         else:
             print(address)
